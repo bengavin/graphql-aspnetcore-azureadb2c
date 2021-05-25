@@ -1,6 +1,7 @@
 using System;
 using GraphQL;
 using GraphQL.Types;
+using StarWars.API.Security;
 using StarWars.API.Services;
 
 namespace StarWars.API.Schema
@@ -11,14 +12,16 @@ namespace StarWars.API.Schema
         {
             Name = "Query";
 
-            Field<CharacterInterface>("hero", resolve: context => data.GetDroidByIdAsync("3"));
+            Field<CharacterInterface>("hero", resolve: context => data.GetDroidByIdAsync("3"))
+                .AuthorizeWith(Policies.CharacterAccess);
+
             Field<HumanType>(
                 "human",
                 arguments: new QueryArguments(
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id", Description = "id of the human" }
                 ),
                 resolve: context => data.GetHumanByIdAsync(context.GetArgument<string>("id"))
-            );
+            ).AuthorizeWith(Policies.CharacterAccess);
 
             Func<IResolveFieldContext, string, object> func = (context, id) => data.GetDroidByIdAsync(id);
 
@@ -28,7 +31,7 @@ namespace StarWars.API.Schema
                     new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id", Description = "id of the droid" }
                 ),
                 resolve: func
-            );
+            ).AuthorizeWith(Policies.CharacterAccess);
         }
     }
 }

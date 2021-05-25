@@ -1,6 +1,7 @@
 using GraphQL;
 using GraphQL.Types;
 using StarWars.API.Models;
+using StarWars.API.Security;
 using StarWars.API.Services;
 
 namespace StarWars.API.Schema
@@ -31,7 +32,7 @@ namespace StarWars.API.Schema
                 {
                     var human = context.GetArgument<Human>("human");
                     return data.AddHuman(human);
-                });
+                }).AuthorizeWith(Policies.CharacterWriteAccess);
         }
     }
 }
