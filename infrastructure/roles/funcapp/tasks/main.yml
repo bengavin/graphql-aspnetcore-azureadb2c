@@ -1,0 +1,19 @@
+- name: Create Function App
+  azure_rm_functionapp:
+    name: "{{ function_app['name'] }}"
+    storage_account: "{{ storage_account['name'] }}"
+    app_settings:
+      FUNCTIONS_EXTENSION_VERSION: "~3"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet"
+    plan: "{{ app_service_plan['name'] }}"
+    location: "{{ function_app['region'] }}"
+    resource_group: "{{ resource_group['name'] }}"
+    auth_source: "{{ auth_source }}"
+    tags: "{{ function_app['tags'] }}"
+    append_tags: false
+    state: present
+  register: functionapp
+
+- debug:
+    var: functionapp
+    verbosity: 2

@@ -1,0 +1,7 @@
+# Use Azure RM inventory plugin
+plugin: azure.azcollection.azure_rm
+plain_host_names: true
+profile: default
+auth_source: cli
+include_vm_resource_groups:
+- rg-securegraphqldemo
