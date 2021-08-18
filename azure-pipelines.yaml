@@ -20,9 +20,13 @@ pool:
 
 # NOTE: This is a workaround for service connections not supporting variable replacement
 #       at runtime (see: https://developercommunity.visualstudio.com/t/using-a-variable-for-the-service-connection-result/676259)
-variables:
-  TestEnvironmentServiceConnection: $(Deployment.Subscription.Test)
-  StageEnvironmentServiceConnection: $(Deployment.Subscription.Stage)
+parameters:
+- name: TestEnvironmentServiceConnection
+  value: $(Deployment.Subscription.Test)
+  type: string
+- name: StageEnvironmentServiceConnection
+  value: $(Deployment.Subscription.Stage)
+  type: string
 
 stages:
 - stage: BuildApiStage
@@ -64,7 +68,7 @@ stages:
       - task: AzureCLI@2
         displayName: Deploy Bicep template
         inputs:
-          azureSubscription: ${{ TestEnvironmentServiceConnection }}
+          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json'
@@ -73,7 +77,7 @@ stages:
       - task: AzureCLI@2
         displayName: Obtain Publish Password
         inputs:
-          azureSubscription: ${{ TestEnvironmentServiceConnection }}
+          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: |
@@ -93,7 +97,7 @@ stages:
         displayName: Publish API Package - Test
         inputs:
           ConnectionType: 'AzureRM'
-          azureSubscription: ${{ TestEnvironmentServiceConnection }}
+          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
           appType: 'webAppLinux'
           WebAppName: 'app-$(Deployment.Environment)-$(Deployment.Application)'
           packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
