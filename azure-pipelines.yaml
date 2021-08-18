@@ -58,7 +58,7 @@ stages:
       - task: AzureCLI@2
         displayName: Deploy Bicep template
         inputs:
-          azureSubscription: '$(Deployment.Subscription)'
+          azureSubscription: '{{ $(Deployment.Subscription) }}'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json'
@@ -67,7 +67,7 @@ stages:
       - task: AzureCLI@2
         displayName: Obtain Publish Password
         inputs:
-          azureSubscription: '$(Deployment.Subscription)'
+          azureSubscription: '{{ $(Deployment.Subscription) }}'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: |
@@ -87,7 +87,7 @@ stages:
         displayName: Publish API Package - Test
         inputs:
           ConnectionType: 'AzureRM'
-          azureSubscription: '$(Deployment.Subscription)'
+          azureSubscription: '{{ $(Deployment.Subscription) }}'
           appType: 'webAppLinux'
           WebAppName: 'app-$(Deployment.Environment)-$(Deployment.Application)'
           packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
