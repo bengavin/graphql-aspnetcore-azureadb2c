@@ -22,10 +22,10 @@ pool:
 #       at runtime (see: https://developercommunity.visualstudio.com/t/using-a-variable-for-the-service-connection-result/676259)
 parameters:
 - name: TestEnvironmentServiceConnection
-  value: $(Deployment.Subscription.Test)
+  default: $(Deployment.Subscription.Test)
   type: string
 - name: StageEnvironmentServiceConnection
-  value: $(Deployment.Subscription.Stage)
+  default: $(Deployment.Subscription.Stage)
   type: string
 
 stages:
