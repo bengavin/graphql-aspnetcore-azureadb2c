@@ -1,0 +1,93 @@
+# Securing ASP.NET Core GraphQL API with Azure Active Directory B2C
+#
+# Build Script
+# 
+# Basic Flow
+# - Build API Package
+# - Test Environment
+#   - Ensure Environment State
+#   - Deploy API to environment
+# - Stage Environment
+#   - Ensure Environment State
+#   - Deploy API to environment
+# ... production ... eventually ...
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: BuildApiStage
+  displayName: Build API
+  jobs:
+    - job: BuildApiJob
+      displayName: Build Api
+      steps:
+        - task: DotNetCoreCLI@2
+          displayName: dotnet build
+          inputs:
+            command: 'build'
+            projects: 'api/StarWars.API.csproj'
+
+        - task: DotNetCoreCLI@2
+          displayName: dotnet publish
+          inputs:
+            command: 'publish'
+            projects: 'api/StarWars.API.csproj'
+            arguments: '--output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: true
+
+        - task: PublishPipelineArtifact@1
+          displayName: Publish API package to pipeline
+          inputs:
+            targetPath: '$(Build.ArtifactStagingDirectory)/*.zip'
+            artifact: 'ApiPackage'
+            publishLocation: 'pipeline'
+
+- stage: TestEnvironmentStage
+  displayName: Test Environment
+  dependsOn: BuildApiStage
+  variables: 
+    - group: securegqldemo - Test
+  jobs:
+    - job: DeployTestEnvironmentJob
+      displayName: Deploy test environment
+      steps:
+      - task: AzureCLI@2
+        displayName: Deploy Bicep template
+        inputs:
+          azureSubscription: '$(Deployment.Subscription)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json'
+          workingDirectory: 'infrastructure'
+
+      - task: AzureCLI@2
+        displayName: Obtain Publish Password
+        inputs:
+          azureSubscription: '$(Deployment.Subscription)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            deployPass = `az webapp deployment list-publishing-profiles --name app-$(Deployment.Environment)-$(Deployment.Application)-api --resource-group rg-$(Deployment.Environment)-$(Deployment.Application) --query '[].userPWD' -o tsv`
+            echo '##vso[task.setvariable variable=Deployment.Password;issecret=true]$(deployPass)'
+          workingDirectory: 'infrastructure'
+      
+      - task: DownloadBuildArtifacts@0
+        displayName: Download API Package
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'ApiPackage'
+          downloadPath: '$(System.ArtifactsDirectory)'
+
+      - task: AzureRmWebAppDeployment@4
+        displayName: Publish API Package - Test
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: '$(Deployment.Subscription)'
+          appType: 'webAppLinux'
+          WebAppName: 'app-$(Deployment.Environment)-$(Deployment.Application)'
+          packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
