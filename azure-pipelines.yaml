@@ -52,7 +52,7 @@ stages:
         - task: PublishPipelineArtifact@1
           displayName: Publish API package to pipeline
           inputs:
-            targetPath: '$(Build.ArtifactStagingDirectory)/*.zip'
+            targetPath: '$(Build.ArtifactStagingDirectory)/api.zip'
             artifact: 'ApiPackage'
             publishLocation: 'pipeline'
 
