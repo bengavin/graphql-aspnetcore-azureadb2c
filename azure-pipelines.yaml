@@ -86,13 +86,12 @@ stages:
             echo '##vso[task.setvariable variable=Deployment.Password;issecret=true]${deployPass}'
           workingDirectory: 'infrastructure'
       
-      - task: DownloadBuildArtifacts@0
+      - task: DownloadPipelineArtifact@2
         displayName: Download API Package
         inputs:
           buildType: 'current'
-          downloadType: 'single'
-          artifactName: 'ApiPackage'
-          downloadPath: '$(System.ArtifactsDirectory)'
+          artifactName: ApiPackage
+          targetPath: '$(System.ArtifactsDirectory)'
 
       - task: AzureRmWebAppDeployment@4
         displayName: Publish API Package - Test
