@@ -91,3 +91,8 @@ module keyVaultModule 'roles/keyvault/keyvault.bicep' = {
     webAppName: webAppModule.outputs.webApp.properties.name
   }
 }
+
+// Output created App Service information
+output apiAppName string = apiAppModule.outputs.apiApp.properties.name
+output webAppName string = webAppModule.outputs.webApp.properties.name
+output funcAppName string = funcAppModule.outputs.funcApp.properties.name

@@ -71,21 +71,19 @@ stages:
           azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
-          inlineScript: 'az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json'
           workingDirectory: 'infrastructure'
-
-      - task: AzureCLI@2
-        displayName: Obtain Publish Password
-        enabled: false
-        inputs:
-          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
           inlineScript: |
-            set deployPass = `az webapp deployment list-publishing-profiles --name app-$(Deployment.Environment)-$(Deployment.Application)-api --resource-group rg-$(Deployment.Environment)-$(Deployment.Application) --query '[].userPWD' -o tsv`
-            echo '##vso[task.setvariable variable=Deployment.Password;issecret=true]${deployPass}'
-          workingDirectory: 'infrastructure'
-      
+            echo "Deploying Bicep Template..."
+            outputs = $(az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json)
+
+            echo "Capturing outputs..."
+            echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
+              while IFS=$"\n" read -r c; do
+                outputname=$(echo "$c" | jq -r '.[0]')
+                outputvalue=$(echo "$c" | jq -r '.[1]')
+                echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
+              done
+
       - task: DownloadPipelineArtifact@2
         displayName: Download API Package
         inputs:
@@ -99,5 +97,5 @@ stages:
           ConnectionType: 'AzureRM'
           azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
           appType: 'webAppLinux'
-          WebAppName: 'app-$(Deployment.Environment)-$(Deployment.Application)'
+          WebAppName: '$(Deployment.Output.apiAppName)'
           packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
