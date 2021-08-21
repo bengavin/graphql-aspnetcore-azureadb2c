@@ -99,3 +99,47 @@ stages:
           appType: 'webAppLinux'
           WebAppName: '$(Deployment.Output.apiAppName)'
           packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
+
+- stage: StageEnvironmentStage
+  displayName: Stage Environment
+  dependsOn: BuildApiStage
+  variables: 
+    - group: securegqldemo - Stage
+  jobs:
+    - job: DeployStageEnvironmentJob
+      displayName: Deploy stage environment
+      steps:
+      - task: AzureCLI@2
+        displayName: Deploy Bicep template
+        inputs:
+          azureSubscription: ${{ parameters.StageEnvironmentServiceConnection }}
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          workingDirectory: 'infrastructure'
+          inlineScript: |
+            echo "Deploying Bicep Template..."
+            outputs=`az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json`
+
+            echo "Capturing outputs..."
+            echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
+              while IFS=$"\n" read -r c; do
+                outputname=$(echo "$c" | jq -r '.[0]')
+                outputvalue=$(echo "$c" | jq -r '.[1]')
+                echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
+              done
+
+      - task: DownloadPipelineArtifact@2
+        displayName: Download API Package
+        inputs:
+          buildType: 'current'
+          artifactName: ApiPackage
+          targetPath: '$(System.ArtifactsDirectory)'
+
+      - task: AzureRmWebAppDeployment@4
+        displayName: Publish API Package - Stage
+        inputs:
+          ConnectionType: 'AzureRM'
+          azureSubscription: ${{ parameters.StageEnvironmentServiceConnection }}
+          appType: 'webAppLinux'
+          WebAppName: '$(Deployment.Output.apiAppName)'
+          packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
