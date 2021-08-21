@@ -74,7 +74,7 @@ stages:
           workingDirectory: 'infrastructure'
           inlineScript: |
             echo "Deploying Bicep Template..."
-            outputs=$(az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json)
+            outputs=`az deployment sub create --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json`
 
             echo "Capturing outputs..."
             echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
