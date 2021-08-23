@@ -73,8 +73,13 @@ stages:
           scriptLocation: 'inlineScript'
           workingDirectory: 'infrastructure'
           inlineScript: |
+            echo "Ensure secret list permissions"
+            vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
+            currentUserObjectId=`az ad signed-in-user show --query 'objectId' --output tsv`
+            az keyvault set-policy --name $vaultName --secret-permissions list --object-id $currentUserObjectId
+
             echo "Retrieving Existing KeyVault Secret Name(s)"
-            secretNames=`az keyvault secret list --vault-name kv-$(Deployment.Environment)-$(Deployment.Application) --query '[].name' --output json`
+            secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
 
             echo "Deploying Bicep Template..."
             outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=$secretNames`
