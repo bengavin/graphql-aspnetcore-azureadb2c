@@ -59,6 +59,9 @@ module webAppModule 'roles/webapp/webapp.bicep' = {
     region: region
     stage: stage
   }
+  dependsOn: [
+    apiAppModule
+  ]
 }
 
 resource funcResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
