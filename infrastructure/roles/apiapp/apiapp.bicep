@@ -43,6 +43,20 @@ resource apiApp 'Microsoft.Web/sites@2018-11-01' = {
       numberOfWorkers: 1
       linuxFxVersion: 'DOTNETCORE|5.0'
       windowsFxVersion: 'DOTNETCORE|5.0'
+      appSettings: [
+        {
+          name: 'AzureB2C-Demo-API__ClientId'
+          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}/secrets/ApiApp-AzureB2C-Demo-API-ClientId)'
+        }
+        {
+          name: 'AzureB2C-Demo-UI__ClientId'
+          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}/secrets/ApiApp-AzureB2C-Demo-UI-ClientId)'
+        }
+        {
+          name: 'AzureB2C-Demo-UI__ClientSecret'
+          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret)'
+        }
+      ]
     }
   }
   identity: {

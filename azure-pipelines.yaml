@@ -91,6 +91,13 @@ stages:
           artifactName: ApiPackage
           targetPath: '$(System.ArtifactsDirectory)'
 
+      - task: FileTransform@1      
+        displayName: Update settings file(s)
+        inputs:
+          folderPath: '$(System.ArtifactsDirectory)/api.zip'
+          fileType: 'json'
+          targetFiles: 'appsettings.json'
+
       - task: AzureRmWebAppDeployment@4
         displayName: Publish API Package - Test
         inputs:
@@ -134,6 +141,13 @@ stages:
           buildType: 'current'
           artifactName: ApiPackage
           targetPath: '$(System.ArtifactsDirectory)'
+
+      - task: FileTransform@1      
+        displayName: Update settings file(s)
+        inputs:
+          folderPath: '$(System.ArtifactsDirectory)/api.zip'
+          fileType: 'json'
+          targetFiles: 'appsettings.json'
 
       - task: AzureRmWebAppDeployment@4
         displayName: Publish API Package - Stage

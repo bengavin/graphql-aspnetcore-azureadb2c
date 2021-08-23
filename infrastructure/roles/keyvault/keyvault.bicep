@@ -110,3 +110,26 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
     environment: stage
   }
 }
+
+// This will create the shells for the needed secrets, the actual values need to be filled in via
+// the Key Vault portal or other external scripts
+resource apiAppApiClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-API-ClientId'
+  properties: {
+    value: '<fill in portal>'
+  }
+}
+
+resource apiAppUIClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientId'
+  properties: {
+    value: '<fill in portal>'
+  }
+}
+
+resource apiAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientSecret'
+  properties: {
+    value: '<fill in portal>'
+  }
+}
