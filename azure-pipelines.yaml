@@ -72,11 +72,11 @@ stages:
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           workingDirectory: 'infrastructure'
+          addSpnToEnvironment: true
           inlineScript: |
             echo "Ensure secret list permissions"
             vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
-            currentUserObjectId=`az ad signed-in-user show --query 'objectId' --output tsv`
-            az keyvault set-policy --name $vaultName --secret-permissions list --object-id $currentUserObjectId
+            az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
 
             echo "Retrieving Existing KeyVault Secret Name(s)"
             secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
