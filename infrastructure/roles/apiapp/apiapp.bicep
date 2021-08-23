@@ -46,15 +46,15 @@ resource apiApp 'Microsoft.Web/sites@2018-11-01' = {
       appSettings: [
         {
           name: 'AzureB2C-Demo-API__ClientId'
-          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-API-ClientId)'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-API-ClientId)'
         }
         {
           name: 'AzureB2C-Demo-UI__ClientId'
-          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientId)'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientId)'
         }
         {
           name: 'AzureB2C-Demo-UI__ClientSecret'
-          value: '@Microsoft.KeyVault(https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret)'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret)'
         }
       ]
     }
