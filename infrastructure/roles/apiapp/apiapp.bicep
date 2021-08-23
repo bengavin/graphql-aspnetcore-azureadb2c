@@ -45,15 +45,15 @@ resource apiApp 'Microsoft.Web/sites@2018-11-01' = {
       windowsFxVersion: 'DOTNETCORE|5.0'
       appSettings: [
         {
-          name: 'AzureB2C-Demo-API__ClientId'
+          name: 'AzureB2C_Demo_API__ClientId'
           value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-API-ClientId)'
         }
         {
-          name: 'AzureB2C-Demo-UI__ClientId'
+          name: 'AzureB2C_Demo_UI__ClientId'
           value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientId)'
         }
         {
-          name: 'AzureB2C-Demo-UI__ClientSecret'
+          name: 'AzureB2C_Demo_UI__ClientSecret'
           value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret)'
         }
       ]

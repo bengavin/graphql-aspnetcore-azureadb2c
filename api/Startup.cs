@@ -45,13 +45,13 @@ namespace StarWars.API
             // API level auth (Bearer Token)
             services.AddMicrosoftIdentityWebApiAuthentication(
                 Configuration, 
-                "AzureB2C-Demo-API", 
+                "AzureB2C_Demo_API", 
                 JwtBearerDefaults.AuthenticationScheme);
 
             // UI level auth (Cookie)
             services.AddMicrosoftIdentityWebAppAuthentication(
                         Configuration, 
-                        "AzureB2C-Demo-UI", 
+                        "AzureB2C_Demo_UI", 
                         OpenIdConnectDefaults.AuthenticationScheme)
                     .EnableTokenAcquisitionToCallDownstreamApi()
                     .AddInMemoryTokenCaches();
