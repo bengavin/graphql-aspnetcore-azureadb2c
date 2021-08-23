@@ -83,9 +83,10 @@ stages:
             echo "Key Vault Secret Name(s): $secretNames"
 
             echo "Deploying Bicep Template..."
-            outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=$secretNames`
+            echo "az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
+            outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
             echo $outputs
-            
+
             echo "Capturing outputs..."
             echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
               while IFS=$"\n" read -r c; do
