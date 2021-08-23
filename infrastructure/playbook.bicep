@@ -20,6 +20,11 @@ param region string = 'useast2'
 @description('Host any web resources on Linux instead of Windows')
 param hostOnLinux bool = true
 
+@description('Existing Key Vault Secret Name(s)')
+param existingKeyVaultSecrets array = [
+  
+]
+
 // Target the overall file at the subscription level
 // Modules are then targetted at the appropriate resource group
 targetScope = 'subscription'
@@ -92,6 +97,7 @@ module keyVaultModule 'roles/keyvault/keyvault.bicep' = {
     region: region
     stage: stage
     webAppName: webAppModule.outputs.webApp.properties.name
+    existingSecrets: existingKeyVaultSecrets
   }
 }
 

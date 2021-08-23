@@ -19,6 +19,10 @@ param funcAppResourceGroup string = ''
 @description('The ObjectId of the Web Application for assignment of KeyVault permissions')
 param webAppName string = ''
 
+@description('Existing Set of Key Vault Secret Name(s)')
+param existingSecrets array = [
+]
+
 // App Service References
 resource apiApp 'Microsoft.Web/sites@2018-11-01' existing = if (apiAppName != '') {
   name: apiAppName
@@ -113,33 +117,21 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 
 // This will create the shells for the needed secrets, the actual values need to be filled in via
 // the Key Vault portal or other external scripts
-resource apiAppApiClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' existing = {
-  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-API-ClientId'
-}
-
-resource apiAppApiClientIdNew 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (apiAppApiClientId.id == null) {
+resource apiAppApiClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'ApiApp-AzureB2C-Demo-API-ClientId')) {
   name: '${keyVault.name}/ApiApp-AzureB2C-Demo-API-ClientId'
   properties: {
     value: '<fill in portal>'
   }
 }
 
-resource apiAppUIClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' existing = {
-  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientId'
-}
-
-resource apiAppUIClientIdNew 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (apiAppUIClientId.id == null) {
+resource apiAppUIClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'ApiApp-AzureB2C-Demo-UI-ClientId')) {
   name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientId'
   properties: {
     value: '<fill in portal>'
   }
 }
 
-resource apiAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' existing = {
-  name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientSecret'
-}
-
-resource apiAppUIClientSecretNew 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (apiAppUIClientSecret.id == null) {
+resource apiAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'ApiApp-AzureB2C-Demo-UI-ClientSecret')) {
   name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientSecret'
   properties: {
     value: '<fill in portal>'
