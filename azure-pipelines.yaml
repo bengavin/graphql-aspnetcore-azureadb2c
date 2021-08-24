@@ -62,7 +62,7 @@ stages:
   variables: 
     - group: securegqldemo - Test
   jobs:
-    - template: "azure-pipelines-deploy-stage.yml"
+    - template: "azure-pipelines-deploy-stage.yaml"
       parameters:
         serviceConnection: ${{ parameters.TestEnvironmentServiceConnection }}
 
@@ -72,6 +72,6 @@ stages:
   variables: 
     - group: securegqldemo - Stage
   jobs:
-    - template: "azure-pipelines-deploy-stage.yml"
+    - template: "azure-pipelines-deploy-stage.yaml"
       parameters:
         serviceConnection: ${{ parameters.StageEnvironmentServiceConnection }}
