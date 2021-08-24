@@ -2,10 +2,12 @@
 parameters:
   - name: serviceConnection
     type: string
+  - name: environment
+    type: string
 
 jobs:
 - job: DeployEnvironmentJob
-  displayName: Deploy ${{ Deployment.Environment }} environment
+  displayName: Deploy ${{ parameters.environment }} environment
   steps:
   - task: AzureCLI@2
     displayName: Deploy Bicep template
@@ -52,7 +54,7 @@ jobs:
       targetFiles: 'appsettings.json'
 
   - task: AzureRmWebAppDeployment@4
-    displayName: Publish API Package - $(Deployment.Environment)
+    displayName: Publish API Package
     inputs:
       ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.serviceConnection }}
