@@ -1,9 +1,0 @@
----
-# Add any (non-secret) ansible vars specific to the STAGE environment here
-# These can be vars that do things like control the flow of the scripts when 
-# in 'test' mode.
-sample_var: 'This is a sample variable value in vars.stage.yml'
-tenant_id: '<your test azure tenant id>'
-object_id: '<your test azure admin user>'
-
-... # End Doc

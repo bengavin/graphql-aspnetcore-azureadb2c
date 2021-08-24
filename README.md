@@ -17,7 +17,7 @@ This example uses some [Ansible](https://www.ansible.com) (another Infrastructur
 
 ## Linking with the target Azure subscription
 
-The example uses 'cli' based authentication to Azure.  This method uses the Azure CLI to link with the target Azure subscription.  Getting Ansible installed and configured should have installed the Azure CLI so it can be used independently.
+The example uses 'cli' based authentication to Azure.  This method uses the Azure CLI to link with the target Azure subscription.  Instructions for installing the Azure CLI can be [found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 Getting hooked into your subscription is as simple as executing the following commands:
 
