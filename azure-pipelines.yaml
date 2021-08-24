@@ -62,109 +62,16 @@ stages:
   variables: 
     - group: securegqldemo - Test
   jobs:
-    - job: DeployTestEnvironmentJob
-      displayName: Deploy test environment
-      steps:
-      - task: AzureCLI@2
-        displayName: Deploy Bicep template
-        inputs:
-          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          workingDirectory: 'infrastructure'
-          addSpnToEnvironment: true
-          inlineScript: |
-            echo "Ensure secret list permissions"
-            vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
-            az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
-
-            echo "Retrieving Existing KeyVault Secret Name(s)"
-            secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
-            echo "Key Vault Secret Name(s): $secretNames"
-
-            echo "Deploying Bicep Template..."
-            echo "az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
-            outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
-            echo $outputs
-
-            echo "Capturing outputs..."
-            echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
-              while IFS=$"\n" read -r c; do
-                outputname=$(echo "$c" | jq -r '.[0]')
-                outputvalue=$(echo "$c" | jq -r '.[1]')
-                echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
-              done
-
-      - task: DownloadPipelineArtifact@2
-        displayName: Download API Package
-        inputs:
-          buildType: 'current'
-          artifactName: ApiPackage
-          targetPath: '$(System.ArtifactsDirectory)'
-
-      - task: FileTransform@1      
-        displayName: Update settings file(s)
-        inputs:
-          folderPath: '$(System.ArtifactsDirectory)/api.zip'
-          fileType: 'json'
-          targetFiles: 'appsettings.json'
-
-      - task: AzureRmWebAppDeployment@4
-        displayName: Publish API Package - Test
-        inputs:
-          ConnectionType: 'AzureRM'
-          azureSubscription: ${{ parameters.TestEnvironmentServiceConnection }}
-          appType: 'webAppLinux'
-          WebAppName: '$(Deployment.Output.apiAppName)'
-          packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
+    - template: "azure-pipelines-deploy-stage.yml"
+      parameters:
+        serviceConnection: ${{ parameters.TestEnvironmentServiceConnection }}
 
 - stage: StageEnvironmentStage
   displayName: Stage Environment
-  dependsOn: BuildApiStage
+  dependsOn: TestEnvironmentStage
   variables: 
     - group: securegqldemo - Stage
   jobs:
-    - job: DeployStageEnvironmentJob
-      displayName: Deploy stage environment
-      steps:
-      - task: AzureCLI@2
-        displayName: Deploy Bicep template
-        inputs:
-          azureSubscription: ${{ parameters.StageEnvironmentServiceConnection }}
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          workingDirectory: 'infrastructure'
-          inlineScript: |
-            echo "Deploying Bicep Template..."
-            outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json`
-
-            echo "Capturing outputs..."
-            echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
-              while IFS=$"\n" read -r c; do
-                outputname=$(echo "$c" | jq -r '.[0]')
-                outputvalue=$(echo "$c" | jq -r '.[1]')
-                echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
-              done
-
-      - task: DownloadPipelineArtifact@2
-        displayName: Download API Package
-        inputs:
-          buildType: 'current'
-          artifactName: ApiPackage
-          targetPath: '$(System.ArtifactsDirectory)'
-
-      - task: FileTransform@1      
-        displayName: Update settings file(s)
-        inputs:
-          folderPath: '$(System.ArtifactsDirectory)/api.zip'
-          fileType: 'json'
-          targetFiles: 'appsettings.json'
-
-      - task: AzureRmWebAppDeployment@4
-        displayName: Publish API Package - Stage
-        inputs:
-          ConnectionType: 'AzureRM'
-          azureSubscription: ${{ parameters.StageEnvironmentServiceConnection }}
-          appType: 'webAppLinux'
-          WebAppName: '$(Deployment.Output.apiAppName)'
-          packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
+    - template: "azure-pipelines-deploy-stage.yml"
+      parameters:
+        serviceConnection: ${{ parameters.StageEnvironmentServiceConnection }}
