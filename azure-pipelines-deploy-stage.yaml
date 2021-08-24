@@ -1,6 +1,7 @@
 # Expects 'stage' variable to be specified
 parameters:
-  - serviceConnection
+  - name: serviceConnection
+    type: string
 
 jobs:
 - job: DeployEnvironmentJob
