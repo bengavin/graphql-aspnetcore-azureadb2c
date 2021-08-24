@@ -1,11 +1,11 @@
-# Expects 'stage' variable to be specified
+# Expects 'serviceConnection' parameter to be specified
 parameters:
   - name: serviceConnection
     type: string
 
 jobs:
 - job: DeployEnvironmentJob
-  displayName: Deploy $(Deployment.Environment) environment
+  displayName: Deploy ${{ Deployment.Environment }} environment
   steps:
   - task: AzureCLI@2
     displayName: Deploy Bicep template
