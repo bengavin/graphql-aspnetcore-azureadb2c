@@ -21,14 +21,16 @@ jobs:
         echo "Check for Key Vault existence"
         resourceGroupName=rg-$(Deployment.Environment)-$(Deployment.Application)
         vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
+        echo "Executing: az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName"
         vaultNames=`az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName`
+        echo "Found Key Vault: $vaultNames == $vaultName"
 
         secretNames='[]'
-        if '$vaultNames' != ''; then
+        if [ "$vaultNames" != "" ]; then
           echo "Ensure secret list permissions"
           az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
 
-          echo "Retrieving Existing KeyVault Secret Name(s)"
+          echo "Retrieving Existing Key Vault Secret Name(s)"
           secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
         fi
         echo "Key Vault Secret Name(s): $secretNames"
