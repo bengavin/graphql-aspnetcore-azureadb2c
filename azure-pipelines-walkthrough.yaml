@@ -11,6 +11,14 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+parameters:
+  - name: TestEnvironmentServiceConnection
+    default: $(Deployment.Subscription.Test)
+    type: string
+  - name: StageEnvironmentServiceConnection
+    default: $(Deployment.Subscription.Stage)
+    type: string
+    
 stages:
 - stage: BuildApiStage
   displayName: Build API
@@ -39,3 +47,28 @@ stages:
             artifact: 'ApiPackage'
             publishLocation: 'pipeline'
 
+- stage: TestEnvironmentStage
+  displayName: Test Environment
+  dependsOn: BuildApiStage
+  variables: 
+    - group: securegqldemo - Test
+  jobs:
+    - template: "azure-pipelines-deploy-stage.yaml"
+      parameters:
+        serviceConnection: ${{ parameters.TestEnvironmentServiceConnection }}
+        environment: $(Deployment.Environment)
+        application: $(Deployment.Application)
+        metadataLocation: $(Deployment.Metadata.Location)
+
+- stage: StageEnvironmentStage
+  displayName: Stage Environment
+  dependsOn: TestEnvironmentStage
+  variables: 
+    - group: securegqldemo - Stage
+  jobs:
+    - template: "azure-pipelines-deploy-stage.yaml"
+      parameters:
+        serviceConnection: ${{ parameters.StageEnvironmentServiceConnection }}
+        environment: $(Deployment.Environment)
+        application: $(Deployment.Application)
+        metadataLocation: $(Deployment.Metadata.Location)
