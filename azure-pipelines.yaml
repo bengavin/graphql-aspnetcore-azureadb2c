@@ -13,6 +13,7 @@
 # ... production ... eventually ...
 
 trigger:
+- part-4-bicep
 - main
 
 pool:
