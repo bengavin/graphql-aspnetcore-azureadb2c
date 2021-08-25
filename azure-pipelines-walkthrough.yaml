@@ -56,9 +56,7 @@ stages:
     - template: "azure-pipelines-deploy-stage.yaml"
       parameters:
         serviceConnection: ${{ parameters.TestEnvironmentServiceConnection }}
-        environment: $(Deployment.Environment)
-        application: $(Deployment.Application)
-        metadataLocation: $(Deployment.Metadata.Location)
+        environment: Test
 
 - stage: StageEnvironmentStage
   displayName: Stage Environment
@@ -69,6 +67,4 @@ stages:
     - template: "azure-pipelines-deploy-stage.yaml"
       parameters:
         serviceConnection: ${{ parameters.StageEnvironmentServiceConnection }}
-        environment: $(Deployment.Environment)
-        application: $(Deployment.Application)
-        metadataLocation: $(Deployment.Metadata.Location)
+        environment: Stage
