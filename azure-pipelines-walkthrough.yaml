@@ -1,0 +1,41 @@
+# Securing ASP.NET Core GraphQL API with Azure Active Directory B2C
+#
+# Build Script
+# 
+# Basic Flow
+# - Build API Package
+
+trigger:
+- part-4-pipeline-walkthrough
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: BuildApiStage
+  displayName: Build API
+  jobs:
+    - job: BuildApiJob
+      displayName: Build Api
+      steps:
+        - task: DotNetCoreCLI@2
+          displayName: dotnet build
+          inputs:
+            command: 'build'
+            projects: 'api/StarWars.API.csproj'
+
+        - task: DotNetCoreCLI@2
+          displayName: dotnet publish
+          inputs:
+            command: 'publish'
+            projects: 'api/StarWars.API.csproj'
+            arguments: '--output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: true
+
+        - task: PublishPipelineArtifact@1
+          displayName: Publish API package to pipeline
+          inputs:
+            targetPath: '$(Build.ArtifactStagingDirectory)/api.zip'
+            artifact: 'ApiPackage'
+            publishLocation: 'pipeline'
+
