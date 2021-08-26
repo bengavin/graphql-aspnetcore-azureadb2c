@@ -1,4 +1,4 @@
-# Expects 'serviceConnection' parameter to be specified
+# All parameters are required
 parameters:
   - name: serviceConnection
     type: string
@@ -18,17 +18,26 @@ jobs:
       workingDirectory: 'infrastructure'
       addSpnToEnvironment: true
       inlineScript: |
-        echo "Ensure secret list permissions"
+        echo "Check for Key Vault existence"
+        resourceGroupName=rg-$(Deployment.Environment)-$(Deployment.Application)
         vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
-        az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
+        echo "Executing: az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName"
+        vaultNames=`az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName`
+        echo "Found Key Vault: $vaultNames == $vaultName"
 
-        echo "Retrieving Existing KeyVault Secret Name(s)"
-        secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
+        secretNames='[]'
+        if [ "$vaultNames" != "" ]; then
+          echo "Ensure secret list permissions"
+          az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
+
+          echo "Retrieving Existing Key Vault Secret Name(s)"
+          secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
+        fi
         echo "Key Vault Secret Name(s): $secretNames"
 
         echo "Deploying Bicep Template..."
-        echo "az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
-        outputs=`az deployment sub create --name playbook-$(Deployment.Application)-$(Deployment.Environment) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
+        echo "az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
+        outputs=`az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
         echo $outputs
 
         echo "Capturing outputs..."
