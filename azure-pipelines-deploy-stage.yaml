@@ -45,7 +45,7 @@ jobs:
           while IFS=$"\n" read -r c; do
             outputname=$(echo "$c" | jq -r '.[0]')
             outputvalue=$(echo "$c" | jq -r '.[1]')
-            echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
+            echo "##vso[task.setvariable variable=Deployment.Output.$outputname;isOutput=true]$outputvalue"
           done
 
 - job: BuildWebJob
