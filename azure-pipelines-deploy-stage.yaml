@@ -118,7 +118,7 @@ jobs:
       packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
 
 - job: DeployWebJob
-  displayName: Deploy API (${{ parameters.environment }})
+  displayName: Deploy Web (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
   steps:
   - task: DownloadPipelineArtifact@2
