@@ -18,7 +18,7 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
-
+  
 # NOTE: This is a workaround for service connections not supporting variable replacement
 #       at runtime (see: https://developercommunity.visualstudio.com/t/using-a-variable-for-the-service-connection-result/676259)
 parameters:
@@ -60,6 +60,7 @@ stages:
 - stage: TestEnvironmentStage
   displayName: Test Environment
   dependsOn: BuildApiStage
+  environment: Test Environment
   variables: 
     - group: securegqldemo - Test
   jobs:
@@ -71,6 +72,7 @@ stages:
 - stage: StageEnvironmentStage
   displayName: Stage Environment
   dependsOn: TestEnvironmentStage
+  environment: Stage Environment
   variables: 
     - group: securegqldemo - Stage
   jobs:
