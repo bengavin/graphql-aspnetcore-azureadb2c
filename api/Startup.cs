@@ -3,6 +3,7 @@ using GraphQL.MicrosoftDI;
 using GraphQL.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -43,10 +44,17 @@ namespace StarWars.API
             });
 
             // API level auth (Bearer Token)
-            services.AddMicrosoftIdentityWebApiAuthentication(
-                Configuration, 
-                "AzureB2C_Demo_API", 
-                JwtBearerDefaults.AuthenticationScheme);
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApi(options =>
+                    {
+                        Configuration.GetSection("AzureB2C_Demo_API").Bind(options);
+                        options.ForwardDefaultSelector = ctx => ctx.Request.Path.StartsWithSegments("/ui/graphiql") ? OpenIdConnectDefaults.AuthenticationScheme : null;
+                    }, options =>
+                    {
+                        Configuration.GetSection("AzureB2C_Demo_API").Bind(options);
+                    },
+                    JwtBearerDefaults.AuthenticationScheme,
+                    true);
 
             // UI level auth (Cookie)
             services.AddMicrosoftIdentityWebAppAuthentication(
@@ -56,12 +64,31 @@ namespace StarWars.API
                     .EnableTokenAcquisitionToCallDownstreamApi()
                     .AddInMemoryTokenCaches();
 
+            services.AddCors(options => {
+                options.AddDefaultPolicy(policy => {
+                    policy.AllowCredentials()
+                          .WithMethods(HttpMethods.Post, HttpMethods.Options)
+                          .AllowAnyHeader()
+                          .WithOrigins(Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>());
+                });
+            });
+
             services.AddControllersWithViews()
                     .AddMicrosoftIdentityUI();
             services.AddRazorPages();
 
             services.AddOptions();
-            services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureB2C-Demo-UI"));
+            services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureB2C_Demo_UI"));
+
+            // Enable both types of authentication/authorization
+            services.AddAuthorization(options =>
+            {
+                var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                        JwtBearerDefaults.AuthenticationScheme,
+                        OpenIdConnectDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser();
+                options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+            });
 
             // Schema
             services.AddScoped<IDocumentWriter, GraphQL.SystemTextJson.DocumentWriter>();
@@ -70,6 +97,14 @@ namespace StarWars.API
             // GraphQL
             services.AddScoped<GraphQLUserContextBuilder>();
             services.AddGraphQL()
+                    // Uncomment this if you need to debug the GraphQL schema generation/etc
+                    /*.AddErrorInfoProvider(options => {
+                        options.ExposeCode = true;
+                        options.ExposeCodes = true;
+                        options.ExposeData = true;
+                        options.ExposeExceptionStackTrace = true;
+                        options.ExposeExtensions = true;
+                    })*/
                     .AddUserContextBuilder(async context => 
                     {
                         // This needs to be done here, as the builder needs Scoped services
@@ -102,6 +137,7 @@ namespace StarWars.API
             app.UseWebSockets();
             app.UseCookiePolicy();
 
+            app.UseCors();
             app.UseRouting();
 
             app.UseAuthentication();

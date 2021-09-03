@@ -15,10 +15,14 @@ namespace StarWars.API.Schema
             Field<CharacterInterface>("hero", resolve: context => data.GetDroidByIdAsync("3"))
                 .AuthorizeWith(Policies.CharacterAccess);
 
+            Field<ListGraphType<CharacterInterface>>("characters", 
+                resolve: context => data.GetCharactersAsync())
+                .AuthorizeWith(Policies.CharacterAccess);
+
             Field<HumanType>(
                 "human",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id", Description = "id of the human" }
+                    new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "id", Description = "id of the human" }
                 ),
                 resolve: context => data.GetHumanByIdAsync(context.GetArgument<string>("id"))
             ).AuthorizeWith(Policies.CharacterAccess);
@@ -28,7 +32,7 @@ namespace StarWars.API.Schema
             FieldDelegate<DroidType>(
                 "droid",
                 arguments: new QueryArguments(
-                    new QueryArgument<NonNullGraphType<StringGraphType>> { Name = "id", Description = "id of the droid" }
+                    new QueryArgument<NonNullGraphType<IdGraphType>> { Name = "id", Description = "id of the droid" }
                 ),
                 resolve: func
             ).AuthorizeWith(Policies.CharacterAccess);

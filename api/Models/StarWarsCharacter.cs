@@ -4,8 +4,9 @@ namespace StarWars.API.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public Alignment Alignment { get; set; }
         public string[] Friends { get; set; }
-        public int[] AppearsIn { get; set; }
+        public Episodes[] AppearsIn { get; set; }
     }
 
 }

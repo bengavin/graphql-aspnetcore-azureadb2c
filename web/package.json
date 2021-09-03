@@ -1,0 +1,34 @@
+{
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "test": "echo \"This template does not include a test runner by default.\" && exit 1"
+  },
+  "devDependencies": {
+    "@snowpack/plugin-react-refresh": "^2.5.0",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
+    "@types/snowpack-env": "^2.3.4",
+    "snowpack": "^3.0.13"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.4.9",
+    "@azure/msal-browser": "^2.16.1",
+    "@azure/msal-react": "^1.0.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-brands-svg-icons": "^5.15.4",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.1.15",
+    "@hookform/resolvers": "^2.8.0",
+    "@snowpack/plugin-sass": "^1.4.0",
+    "bootstrap": "^5.1.0",
+    "graphql": "^15.5.1",
+    "history": "^5.0.1",
+    "react": "^17.0.2",
+    "react-bootstrap": "^2.0.0-beta.6",
+    "react-dom": "^17.0.2",
+    "react-hook-form": "^7.14.0",
+    "react-router-dom": "^6.0.0-beta.2",
+    "zod": "^3.8.1"
+  }
+}
