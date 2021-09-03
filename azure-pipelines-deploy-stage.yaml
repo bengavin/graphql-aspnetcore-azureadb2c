@@ -48,6 +48,52 @@ jobs:
             echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
           done
 
+- job: BuildWebJob
+  displayName: Build Web (${{ parameters.environment }})
+  steps:
+  - task: CmdLine@2
+    displayName: 'Restore Web Packages'
+    inputs:
+      workingDirectory: 'web'
+      script: |
+        echo "Restoring NPM packages..."
+        npm install
+
+  - task: CmdLine@2
+    displayName: 'Snowpack Build'
+    env:
+      SNOWPACK_PUBLIC_API_BASE_URL: '$(GraphiQL.BaseUri)/graphql'
+      SNOWPACK_PUBLIC_ENV: '${{ upper(parameters.environment) }}'
+      SNOWPACK_PUBLIC_B2C_CLIENT_ID: '$(Snowpack.B2C.ClientId)'
+      SNOWPACK_PUBLIC_B2C_AUTHORITY: '$(Snowpack.B2C.Authority)'
+      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(Deployment.Output.webAppName).azurewebsites.net/blank.html'
+      SNOWPACK_PUBLIC_B2C_KNOWN_AUTHORITIES: '$(Snowpack.B2C.KnownAuthorities)'
+      SNOWPACK_PUBLIC_B2C_REQUEST_SCOPES: '$(Snowpack.B2C.RequestScopes)'
+    inputs:
+      workingDirectory: 'web'
+      script: |
+        echo "Building for Deployment..."
+        npx snowpack build
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'web/wwwroot'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
+      replaceExistingArchive: true
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Web package to pipeline
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/web.zip'
+      artifact: 'WebPackage'
+      publishLocation: 'pipeline'
+
+- job: DeployApiJob
+  displayName: Deploy API (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download API Package
     inputs:
@@ -70,3 +116,23 @@ jobs:
       appType: 'webAppLinux'
       WebAppName: '$(Deployment.Output.apiAppName)'
       packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
+
+- job: DeployWebJob
+  displayName: Deploy API (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download Web Package
+    inputs:
+      buildType: 'current'
+      artifactName: WebPackage
+      targetPath: '$(System.ArtifactsDirectory)'
+
+  - task: AzureRmWebAppDeployment@4
+    displayName: Publish Web Package
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: ${{ parameters.serviceConnection }}
+      appType: 'webAppLinux'
+      WebAppName: '$(Deployment.Output.webAppName)'
+      packageForLinux: '$(System.ArtifactsDirectory)/web.zip'
