@@ -50,6 +50,9 @@ jobs:
 
 - job: BuildWebJob
   displayName: Build Web (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  variables:
+    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['Deployment.Output.webAppName'] ]
   steps:
   - task: CmdLine@2
     displayName: 'Restore Web Packages'
@@ -66,7 +69,7 @@ jobs:
       SNOWPACK_PUBLIC_ENV: '${{ upper(parameters.environment) }}'
       SNOWPACK_PUBLIC_B2C_CLIENT_ID: '$(Snowpack.B2C.ClientId)'
       SNOWPACK_PUBLIC_B2C_AUTHORITY: '$(Snowpack.B2C.Authority)'
-      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(Deployment.Output.webAppName).azurewebsites.net/blank.html'
+      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(webAppName).azurewebsites.net/blank.html'
       SNOWPACK_PUBLIC_B2C_KNOWN_AUTHORITIES: '$(Snowpack.B2C.KnownAuthorities)'
       SNOWPACK_PUBLIC_B2C_REQUEST_SCOPES: '$(Snowpack.B2C.RequestScopes)'
     inputs:
@@ -93,6 +96,8 @@ jobs:
 - job: DeployApiJob
   displayName: Deploy API (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
+  variables:
+    apiAppName: $[ dependencies.DeployEnvironmentJob.outputs['Deployment.Output.apiAppName'] ]
   steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download API Package
@@ -114,12 +119,14 @@ jobs:
       ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.serviceConnection }}
       appType: 'webAppLinux'
-      WebAppName: '$(Deployment.Output.apiAppName)'
+      WebAppName: '$(apiAppName)'
       packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
 
 - job: DeployWebJob
   displayName: Deploy Web (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
+  variables:
+    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['Deployment.Output.webAppName'] ]
   steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download Web Package
@@ -134,5 +141,5 @@ jobs:
       ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.serviceConnection }}
       appType: 'webAppLinux'
-      WebAppName: '$(Deployment.Output.webAppName)'
+      WebAppName: '$(webAppName)'
       packageForLinux: '$(System.ArtifactsDirectory)/web.zip'
