@@ -53,7 +53,7 @@ jobs:
   displayName: Build Web (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
   variables:
-    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppName'] ]
+    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppHostname'] ]
   steps:
   - task: CmdLine@2
     displayName: 'Restore Web Packages'
@@ -70,7 +70,7 @@ jobs:
       SNOWPACK_PUBLIC_ENV: '${{ upper(parameters.environment) }}'
       SNOWPACK_PUBLIC_B2C_CLIENT_ID: '$(Snowpack.B2C.ClientId)'
       SNOWPACK_PUBLIC_B2C_AUTHORITY: '$(Snowpack.B2C.Authority)'
-      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(webAppName).azurewebsites.net/blank.html'
+      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(webAppName)/blank.html'
       SNOWPACK_PUBLIC_B2C_KNOWN_AUTHORITIES: '$(Snowpack.B2C.KnownAuthorities)'
       SNOWPACK_PUBLIC_B2C_REQUEST_SCOPES: '$(Snowpack.B2C.RequestScopes)'
     inputs:
@@ -79,19 +79,11 @@ jobs:
         echo "Building for Deployment..."
         npx snowpack build
 
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: 'web/wwwroot'
-      includeRootFolder: false
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
-      replaceExistingArchive: true
-
   - task: PublishPipelineArtifact@1
     displayName: Publish Web package to pipeline
     inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/web.zip'
-      artifact: 'WebPackage'
+      targetPath: 'web/wwwroot'
+      artifact: 'WebFiles'
       publishLocation: 'pipeline'
 
 - job: DeployApiJob
@@ -127,20 +119,20 @@ jobs:
   displayName: Deploy Web (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
   variables:
-    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppName'] ]
+    storageAccountName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppStorageAccountName'] ]
   steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download Web Package
     inputs:
       buildType: 'current'
-      artifactName: WebPackage
-      targetPath: '$(System.ArtifactsDirectory)'
+      artifactName: WebFiles
+      targetPath: '$(System.ArtifactsDirectory)/web'
 
-  - task: AzureRmWebAppDeployment@4
-    displayName: Publish Web Package
+  - task: AzureCLI@2
+    displayName: "Azure CLI - Copy Web to BLOB storage"
     inputs:
-      ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.serviceConnection }}
-      appType: 'webAppLinux'
-      WebAppName: '$(webAppName)'
-      packageForLinux: '$(System.ArtifactsDirectory)/web.zip'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az storage blob upload-batch -d \$web -s $(System.ArtifactsDirectory)/web --account-name $(storageAccountName)'
+

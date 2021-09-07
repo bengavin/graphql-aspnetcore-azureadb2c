@@ -60,13 +60,11 @@ module webAppModule 'roles/webapp/webapp.bicep' = {
   name: 'webAppModule'
   params: {
     application: application
-    isLinux: hostOnLinux
     region: region
     stage: stage
+    storageAccountName: baseModule.outputs.storageAccountName
+    storageAccountStaticWebEndpoint: baseModule.outputs.storageAccountStaticWebsiteHost
   }
-  dependsOn: [
-    apiAppModule
-  ]
 }
 
 resource funcResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -96,12 +94,12 @@ module keyVaultModule 'roles/keyvault/keyvault.bicep' = {
     funcAppResourceGroup: funcResourceGroup.name
     region: region
     stage: stage
-    webAppName: webAppModule.outputs.webApp.properties.name
     existingSecrets: existingKeyVaultSecrets
   }
 }
 
 // Output created App Service information
 output apiAppName string = apiAppModule.outputs.apiApp.properties.name
-output webAppName string = webAppModule.outputs.webApp.properties.name
+output webAppStorageAccountName string = webAppModule.outputs.websiteStorageAccountName
+output webAppHostname string = webAppModule.outputs.websiteHostName
 output funcAppName string = funcAppModule.outputs.funcApp.properties.name
