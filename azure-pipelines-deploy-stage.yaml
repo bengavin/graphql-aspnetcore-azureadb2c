@@ -70,7 +70,7 @@ jobs:
   - task: CmdLine@2
     displayName: 'Snowpack Build'
     env:
-      SNOWPACK_PUBLIC_API_BASE_URL: '$(GraphiQL.BaseUri)/graphql'
+      SNOWPACK_PUBLIC_API_BASE_URL: '$(GraphiQL.BaseUri)'
       SNOWPACK_PUBLIC_ENV: '${{ upper(parameters.environment) }}'
       SNOWPACK_PUBLIC_B2C_CLIENT_ID: '$(Snowpack.B2C.ClientId)'
       SNOWPACK_PUBLIC_B2C_AUTHORITY: '$(Snowpack.B2C.Authority)'
