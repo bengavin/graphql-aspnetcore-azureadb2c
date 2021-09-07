@@ -41,6 +41,10 @@ jobs:
         outputs=`az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
         echo $outputs
 
+        if [ "${outputs:0:5}" == "ERROR" ]; then
+          exit 1
+        fi
+
         echo "Capturing outputs..."
         echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
           while IFS=$"\n" read -r c; do
