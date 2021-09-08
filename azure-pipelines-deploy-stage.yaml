@@ -39,9 +39,9 @@ jobs:
         echo "Deploying Bicep Template..."
         echo "az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
         outputs=`az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
-        echo $outputs
+        echo ${outputs:0:5}
 
-        if [ "${outputs:0:5}" == "ERROR" ]; then
+        if [ "${outputs:0:5}" = "ERROR" ]; then
           exit 1
         fi
 
