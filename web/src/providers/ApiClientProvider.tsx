@@ -17,6 +17,33 @@ export const loginRequest = {
     prompt: "select_account",
 };
 
+let loginPopupPromise = null;
+const acquireTokenPopup = (instance) => {
+    if (!loginPopupPromise) {
+        loginPopupPromise = instance.acquireTokenPopup(loginRequest);
+
+        // once this completes, set the modular value to null so future requests
+        // will generate a new popup
+        loginPopupPromise.finally(r => loginPopupPromise = null);
+    }
+
+    return loginPopupPromise;
+}
+
+let loginSilentPromise = null;
+const acquireTokenSilent = (account, instance) => {
+    if (!loginSilentPromise) {
+        loginSilentPromise = instance.acquireTokenSilent({
+            ...loginSilentRequest,
+            account
+        }).then(response => response.accessToken);
+
+        loginSilentPromise.finally(r => loginSilentPromise = null);
+    }
+
+    return loginSilentPromise;
+};
+
 export type ApiClientProps = PropsWithChildren<{}>;
 
 const ApiClientProvider = ({ children }: ApiClientProps): React.ReactElement => {
@@ -26,23 +53,14 @@ const ApiClientProvider = ({ children }: ApiClientProps): React.ReactElement => 
         // NOTE: This isn't great, but the MSAL library will throw an exception
         //       if silent acquisition fails, so we need to handle that
         const account = accounts[0] ?? null;
-        if (account && inProgress === "none") {
-            try {
-                const result = await instance.acquireTokenSilent({
-                    ...loginSilentRequest,
-                    account,
-                });
-                return result.accessToken;
-            } catch (err) {
-                if (err instanceof InteractionRequiredAuthError) {
-                    // fallback to interaction when silent call fails
-                    return instance.acquireTokenPopup(loginRequest);
-                }
-            }
-        } else if (!account && inProgress === "none") {
-            return instance.acquireTokenPopup(loginRequest);
-        }
-        return null;
+        return account 
+             ? acquireTokenSilent(account, instance)
+               .catch(async (error) => 
+                    error instanceof InteractionRequiredAuthError
+                    ? acquireTokenPopup(instance)
+                    : null)
+             : acquireTokenPopup(instance);
+
     };
 
     const httpLink = createHttpLink({
