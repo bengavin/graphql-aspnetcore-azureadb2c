@@ -133,20 +133,6 @@ export const useAddCharacter = (type, onComplete) => {
             CHARACTER_LIST_QUERY,
             'characterList',
         ],
-        // update(cache, { data: { addCharacter } }) {
-        //     debugger;
-        //     cache.modify({
-        //         fields: {
-        //             actions(existingCharacters = []) {
-        //                 const newCharacterRef = cache.writeFragment({
-        //                     data: addCharacter,
-        //                     fragment: CHARACTER_CORE_FIELDS_FRAGMENT
-        //                 });
-        //                 return [...existingCharacters, newCharacterRef];
-        //             }
-        //         }
-        //     });
-        // }
     });
 
     return {

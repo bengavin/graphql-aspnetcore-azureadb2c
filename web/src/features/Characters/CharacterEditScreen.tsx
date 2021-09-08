@@ -24,12 +24,12 @@ export const CharacterEditScreen = () => {
     if (characterLoading) {
         return (<>
             <PageHeader backLink="/characters" pageTitle={pageTitle} />
-            <SimpleInlineAlert variant="info" iconElement={loadingIconElement} header="One moment" content="Loading action..." />
+            <SimpleInlineAlert variant="info" iconElement={loadingIconElement} header="One moment" content="Loading character..." />
         </>);
     }
 
     const errorIconElement = <FontAwesomeIcon icon={faExclamationTriangle} size="2x" className="mr-3" />;
-    const errorContent = `We were unable to load the action: ${characterError}`;
+    const errorContent = `We were unable to load the character: ${characterError}`;
     if (characterError) {
         return (<>
             <PageHeader backLink="/characters" pageTitle={pageTitle} />

@@ -70,7 +70,7 @@ const asFormValues = (data) => {
     if (!data) { return data; }
     console.log("data", data);
 
-    // convert from ActionGraphType form
+    // convert from CharacterGraphType form
 
     const appearsIn = episodes.map(e => {
         return {

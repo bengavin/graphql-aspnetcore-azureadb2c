@@ -121,7 +121,9 @@ jobs:
 
 - job: DeployWebJob
   displayName: Deploy Web (${{ parameters.environment }})
-  dependsOn: DeployEnvironmentJob
+  dependsOn: 
+  - DeployEnvironmentJob
+  - BuildWebJob
   variables:
     storageAccountName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppStorageAccountName'] ]
   steps:
