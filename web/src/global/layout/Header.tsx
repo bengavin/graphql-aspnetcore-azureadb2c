@@ -6,10 +6,10 @@ import {
   useMsal,
 } from "@azure/msal-react";
 
-// NOTE: The following method of importing is against Bootstrap best practice
-//       but doing it the recommended way breaks w/ Snowpack versions higher
-//       than 3.0.11 (-might- work with 3.0.13)
-import { Navbar, Nav, Button, ButtonGroup } from "react-bootstrap";
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";

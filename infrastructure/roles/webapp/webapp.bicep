@@ -184,5 +184,39 @@ resource cdnEndpointOrigin 'Microsoft.Cdn/profiles/endpoints/origins@2020-09-01'
   properties: originProperties
 }
 
+resource httpsRuleSet 'Microsoft.Cdn/profiles/ruleSets@2020-09-01' = {
+  name: 'Global'
+  parent: cdnProfile
+
+  resource httpsRule 'rules@2020-09-01' = {
+    name: 'EnforceHTTPS'
+    properties: {
+      conditions: [
+        {
+          name: 'RequestScheme'
+          parameters: {
+            '@odata.type': '#Microsoft.Azure.Cdn.Models.DeliveryRuleRequestSchemeConditionParameters'
+            operator: 'Equal'
+            matchValues: [
+              'HTTP'
+            ]
+          }
+        }
+      ]
+      actions: [
+        {
+          name: 'UrlRedirect'
+          parameters: {
+            '@odata.type': '#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRedirectActionParameters'
+            redirectType: 'Found'
+            destinationProtocol: 'Https'
+          }
+        }
+      ]
+      matchProcessingBehavior: 'Stop'
+    }
+  }
+}
+
 output websiteHostName string = cdnEndpoint.properties.hostName
 output websiteStorageAccountName string = storageAccount.name
