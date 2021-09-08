@@ -23,6 +23,8 @@ const ApiClientProvider = ({ children }: ApiClientProps): React.ReactElement => 
     const { instance, accounts, inProgress } = useMsal();
     
     const GetAccessToken = async () => {
+        // NOTE: This isn't great, but the MSAL library will throw an exception
+        //       if silent acquisition fails, so we need to handle that
         const account = accounts[0] ?? null;
         if (account && inProgress === "none") {
             try {
