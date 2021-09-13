@@ -1,5 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
-import { logger, loggingLevel } from "@helpers/logger";
+import { logger, loggingLevel } from "~helpers/logger";
 
 const CHARACTER_CORE_FIELDS_FRAGMENT = gql`
 fragment CoreFields on Character {

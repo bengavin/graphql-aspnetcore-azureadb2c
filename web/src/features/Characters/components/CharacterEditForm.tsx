@@ -12,10 +12,10 @@ import Table from "react-bootstrap/Table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import { episodes, episodesDisplay } from "@components/enumerations/Episodes";
-import { AlignmentIcon, alignments, AlignmentSelect } from "@components/enumerations/Alignments";
-import { logger, loggingLevel } from "@helpers/logger";
-import { withValidatedClassName } from "@helpers/withValidatedClassName";
+import { episodes, episodesDisplay } from "~components/enumerations/Episodes";
+import { AlignmentIcon, alignments, AlignmentSelect } from "~components/enumerations/Alignments";
+import { logger, loggingLevel } from "~helpers/logger";
+import { withValidatedClassName } from "~helpers/withValidatedClassName";
 
 import { useAddCharacter, useUpdateCharacter } from "../queries/CharacterQueries";
 import { CharacterTypeSelect } from "./CharacterTypeSelect";

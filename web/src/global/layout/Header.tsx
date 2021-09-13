@@ -13,7 +13,7 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
-import { loginRequest } from "@providers/ApiClientProvider";
+import { loginRequest } from "~providers/ApiClientProvider";
 
 function Header() {
   const { pathname } = useLocation();

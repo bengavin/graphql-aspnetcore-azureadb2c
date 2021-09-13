@@ -8,9 +8,9 @@ import Spinner from "react-bootstrap/Spinner";
 
 import { useGetCharacter } from "./queries/CharacterQueries";
 
-import { SimpleInlineAlert } from "@components/alerts/SimpleInlineAlert";
-import { PageHeader } from "@components/PageHeader";
-import { logger, loggingLevel } from "@helpers/logger";
+import { SimpleInlineAlert } from "~components/alerts/SimpleInlineAlert";
+import { PageHeader } from "~components/PageHeader";
+import { logger, loggingLevel } from "~helpers/logger";
 import { CharacterEditForm } from "./components/CharacterEditForm";
 
 export const CharacterEditScreen = () => {

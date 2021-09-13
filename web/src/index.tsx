@@ -4,8 +4,8 @@ import ReactDOM from "react-dom";
 import { MsalProvider } from "@azure/msal-react";
 import { Configuration, PublicClientApplication } from "@azure/msal-browser";
 
-import { App } from "@global/App";
-import { keys } from "@global/config";
+import { App } from "~global/App";
+import { keys } from "~global/config";
 import ApiClientProvider from "./providers/ApiClientProvider";
 
 // MSAL configuration

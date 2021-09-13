@@ -1,4 +1,4 @@
-﻿import { keys } from "@global/config";
+﻿import { keys } from "~global/config";
 
 export const loggingLevel = {
     TRACE: 0,

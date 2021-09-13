@@ -1,8 +1,8 @@
 ﻿import React from "react";
 
-import { logger } from "@helpers/logger";
+import { logger } from "~helpers/logger";
 import Button from "react-bootstrap/Button";
-import { ErrorContainer } from "@components/alerts/ErrorContainer";
+import { ErrorContainer } from "~components/alerts/ErrorContainer";
 
 const LoggedOutError = () => {
     return (

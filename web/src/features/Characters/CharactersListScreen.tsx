@@ -9,8 +9,8 @@ import Dropdown from "react-bootstrap/Dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faExclamationTriangle, faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import { SimpleInlineAlert } from "@components/alerts/SimpleInlineAlert";
-import { AlignmentIcon } from "@components/enumerations/Alignments";
+import { SimpleInlineAlert } from "~components/alerts/SimpleInlineAlert";
+import { AlignmentIcon } from "~components/enumerations/Alignments";
 
 import { useListQuery } from "./queries/CharacterQueries";
 import { CharacterTypeIcon } from "./components/CharacterTypeDisplay";

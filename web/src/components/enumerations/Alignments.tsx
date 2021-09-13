@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useFormContext } from "react-hook-form";
-import { withValidatedClassName } from "@helpers/withValidatedClassName";
+import { withValidatedClassName } from "~helpers/withValidatedClassName";
 import { faJedi, faMinus, faMoon, faQuestionCircle, faSun } from "@fortawesome/free-solid-svg-icons";
 import { faMandalorian, faSith } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

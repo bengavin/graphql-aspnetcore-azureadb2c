@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { withValidatedClassName } from "@helpers/withValidatedClassName";
+import { withValidatedClassName } from "~helpers/withValidatedClassName";
 
 export const CharacterTypeSelect = ({name, errors = null, ...props}) => {
     const { register, getValues, formState: { errors: formErrors } } = useFormContext();

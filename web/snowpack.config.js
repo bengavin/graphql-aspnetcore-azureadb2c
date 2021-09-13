@@ -27,12 +27,12 @@ module.exports = {
     target: "es2020",
   },
   alias: {
-    "@components": "./src/components",
-    "@features": "./src/features",
-    "@global": "./src/global",
-    "@helpers": "./src/helpers",
-    "@providers": "./src/providers",
-    "@root": "./public",
+    "~components": "./src/components",
+    "~features": "./src/features",
+    "~global": "./src/global",
+    "~helpers": "./src/helpers",
+    "~providers": "./src/providers",
+    "~root": "./public",
   },
   packageOptions: {
     /* ... */

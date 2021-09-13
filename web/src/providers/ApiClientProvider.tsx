@@ -5,7 +5,7 @@ import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { ApolloProvider } from "@apollo/client/react";
-import { keys } from "@global/config";
+import { keys } from "~global/config";
 
 // Setup required scopes for supporting the required GraphQL queries
 export const loginSilentRequest = {
@@ -22,7 +22,7 @@ export type ApiClientProps = PropsWithChildren<{}>;
 const ApiClientProvider = ({ children }: ApiClientProps): React.ReactElement => {
     const { instance, accounts, inProgress } = useMsal();
     
-    const GetAccessToken = async () => {
+    const getAccessToken = async () => {
         // NOTE: This isn't great, but the MSAL library will throw an exception
         //       if silent acquisition fails, so we need to handle that
         const account = accounts[0] ?? null;
@@ -51,7 +51,7 @@ const ApiClientProvider = ({ children }: ApiClientProps): React.ReactElement => 
 
     const authLink = setContext(async (_, { headers }) => {
         // get the authentication token from our retrieved access token
-        const token = await GetAccessToken();
+        const token = await getAccessToken();
 
         // return the headers to the context so httpLink can read them
         return {

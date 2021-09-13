@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
       "paths": {
-        "@components/*": [ "./src/components/*" ],
-        "@features/*": [ "./src/features/*" ],
-        "@global/*": [ "./src/global/*" ],
-        "@helpers/*": [ "./src/helpers/*" ],
-        "@providers/*": [ "./src/providers/*" ]
+        "~components/*": [ "./src/components/*" ],
+        "~features/*": [ "./src/features/*" ],
+        "~global/*": [ "./src/global/*" ],
+        "~helpers/*": [ "./src/helpers/*" ],
+        "~providers/*": [ "./src/providers/*" ]
       },
       "jsx": "preserve",
       "allowSyntheticDefaultImports": true,
