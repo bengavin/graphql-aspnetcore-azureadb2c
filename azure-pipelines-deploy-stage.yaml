@@ -10,6 +10,7 @@ jobs:
   displayName: Deploy ${{ parameters.environment }} environment
   steps:
   - task: AzureCLI@2
+    name: BicepDeploy
     displayName: Deploy Bicep template
     inputs:
       azureSubscription: ${{ parameters.serviceConnection }}
@@ -38,16 +39,63 @@ jobs:
         echo "Deploying Bicep Template..."
         echo "az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
         outputs=`az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
-        echo $outputs
+
+        if [ "$outputs" = "" ]; then
+          echo "Deployment failed..."
+          exit 1
+        fi
 
         echo "Capturing outputs..."
         echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
           while IFS=$"\n" read -r c; do
             outputname=$(echo "$c" | jq -r '.[0]')
             outputvalue=$(echo "$c" | jq -r '.[1]')
-            echo "##vso[task.setvariable variable=Deployment.Output.$outputname]$outputvalue"
+            echo "##vso[task.setvariable variable=$outputname;isOutput=true]$outputvalue"
           done
 
+- job: BuildWebJob
+  displayName: Build Web (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  variables:
+    webAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppHostname'] ]
+  steps:
+  - task: CmdLine@2
+    displayName: 'Restore Web Packages'
+    inputs:
+      workingDirectory: 'web'
+      script: |
+        echo "Restoring NPM packages..."
+        npm install
+
+  - task: CmdLine@2
+    displayName: 'Snowpack Build'
+    env:
+      SNOWPACK_PUBLIC_API_BASE_URL: '$(GraphiQL.BaseUri)'
+      SNOWPACK_PUBLIC_ENV: '${{ upper(parameters.environment) }}'
+      SNOWPACK_PUBLIC_B2C_CLIENT_ID: '$(Snowpack.B2C.ClientId)'
+      SNOWPACK_PUBLIC_B2C_AUTHORITY: '$(Snowpack.B2C.Authority)'
+      SNOWPACK_PUBLIC_B2C_REDIRECT_URI: 'https://$(webAppName)/blank.html'
+      SNOWPACK_PUBLIC_B2C_KNOWN_AUTHORITIES: '$(Snowpack.B2C.KnownAuthorities)'
+      SNOWPACK_PUBLIC_B2C_REQUEST_SCOPES: '$(Snowpack.B2C.RequestScopes)'
+    inputs:
+      workingDirectory: 'web'
+      script: |
+        echo "Building for Deployment..."
+        npx snowpack build
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Web package to pipeline
+    inputs:
+      targetPath: 'web/wwwroot'
+      artifact: 'WebFiles'
+      publishLocation: 'pipeline'
+
+- job: DeployApiJob
+  displayName: Deploy API (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  variables:
+    apiAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.apiAppName'] ]
+  steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download API Package
     inputs:
@@ -68,5 +116,29 @@ jobs:
       ConnectionType: 'AzureRM'
       azureSubscription: ${{ parameters.serviceConnection }}
       appType: 'webAppLinux'
-      WebAppName: '$(Deployment.Output.apiAppName)'
+      WebAppName: '$(apiAppName)'
       packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
+
+- job: DeployWebJob
+  displayName: Deploy Web (${{ parameters.environment }})
+  dependsOn: 
+  - DeployEnvironmentJob
+  - BuildWebJob
+  variables:
+    storageAccountName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.webAppStorageAccountName'] ]
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download Web Package
+    inputs:
+      buildType: 'current'
+      artifactName: WebFiles
+      targetPath: '$(System.ArtifactsDirectory)/web'
+
+  - task: AzureCLI@2
+    displayName: "Azure CLI - Copy Web to BLOB storage"
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az storage blob upload-batch -d \$web -s $(System.ArtifactsDirectory)/web --account-name $(storageAccountName)'
+

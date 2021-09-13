@@ -31,7 +31,7 @@ var funcAppName = 'func-${stage}-${application}'
 resource funcServicePlan 'Microsoft.Web/serverfarms@2020-12-01' = {
   name: '${funcAppName}-plan'
   location: region
-  kind: isLinux ? 'linux' : 'web'
+  kind: appKind
   sku: {
     name: 'Y1'
     tier: 'Dynamic'

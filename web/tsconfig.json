@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "paths": {
+        "~components/*": [ "./src/components/*" ],
+        "~features/*": [ "./src/features/*" ],
+        "~global/*": [ "./src/global/*" ],
+        "~helpers/*": [ "./src/helpers/*" ],
+        "~providers/*": [ "./src/providers/*" ]
+      },
+      "jsx": "preserve",
+      "allowSyntheticDefaultImports": true,
+      "strict": false,
+      "moduleResolution": "node",
+      "lib": [ "esnext", "dom" ],
+      "module": "esnext",
+      "target": "esnext",
+      "skipLibCheck": true,
+      "types": [ "@types/snowpack-env" ],
+      "typeRoots": [ "./types" ]
+    }
+}

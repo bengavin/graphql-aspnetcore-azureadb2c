@@ -50,3 +50,16 @@ az deployment sub create --location eastus2 --template-file playbook.bicep --par
 ## 'Features' of the solution thus far
 
 There is currently a limitation in Azure around consumption based function apps, specifically those hosted in linux environments.  These apps cannot be hosted in a 'Free' tier service plan, and additionally, must be hosted in a special-use consumption based application service plan.  These Linux based consumption plans can only co-exist in a resource group that contains only other consumption based service plans.  The function app `.bicep` file in use here puts both the service plan and the function app together in a resource group, but technically, only the consumption based service plan need exist outside the main resource group.  For more details on the 'why' of this, see [this article](https://github.com/Azure/Azure-Functions/wiki/Creating-Function-Apps-in-an-existing-Resource-Group)
+
+# React Web App
+
+Site created with the following command:
+
+```
+npx create-snowpack-app web --template @snowpack/app-template-minimal
+```
+
+NOTE:  The latest Snowpack version (3.3.8 as of this writing) fails to properly handle React + Bootstrap and as such, the version has been dialed back to 3.0.13.  This required:
+
+* Rename snowpack.config.mjs -> snowpack.config.js
+* Switch configuration from 'export ...' to module.exports = ...

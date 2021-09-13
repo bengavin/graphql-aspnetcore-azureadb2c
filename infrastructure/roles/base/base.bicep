@@ -43,10 +43,19 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   location: region
   kind: 'StorageV2'
   sku: {
-    name: 'Standard_LRS'
+    name: 'Standard_RAGRS'
   }
   properties: {
     accessTier: 'Hot'
+    allowBlobPublicAccess: true
+    allowSharedKeyAccess: true
+    supportsHttpsTrafficOnly: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+      ipRules: []
+    }
   }
   tags: {
     environment: stage
@@ -56,4 +65,5 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
 
 output logAnalytics object = logAnalytics
 output appInsights object = appInsights
-output storageAccount object = storageAccount
+output storageAccountName string = storageAccount.name
+output storageAccountStaticWebsiteHost string = storageAccount.properties.primaryEndpoints.web

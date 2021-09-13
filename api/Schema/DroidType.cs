@@ -13,7 +13,8 @@ namespace StarWars.API.Schema
 
             Field(d => d.Id).Description("The id of the droid.");
             Field(d => d.Name, nullable: true).Description("The name of the droid.");
-
+            Field<AlignmentEnum>("alignment", "The alignment of the character", resolve: ctx => ctx.Source.Alignment);
+            
             Field<ListGraphType<CharacterInterface>>(
                 "friends",
                 resolve: context => data.GetFriends(context.Source)
