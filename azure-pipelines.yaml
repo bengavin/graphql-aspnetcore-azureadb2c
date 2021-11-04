@@ -46,6 +46,7 @@ stages:
           displayName: dotnet publish
           inputs:
             command: 'publish'
+            publishWebProjects: false
             projects: 'api/StarWars.API.csproj'
             arguments: '--output $(Build.ArtifactStagingDirectory)'
             zipAfterPublish: true
@@ -72,6 +73,7 @@ stages:
             command: 'publish'
             projects: 'web-blazor/StarWars.UI.Blazor.csproj'
             arguments: '--output $(Build.ArtifactStagingDirectory)'
+            publishWebProjects: false
             zipAfterPublish: true
 
         - task: PublishPipelineArtifact@1
