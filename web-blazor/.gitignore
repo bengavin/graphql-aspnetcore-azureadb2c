@@ -1,0 +1,10 @@
+# SASS Compilation Node.JS modules
+node_modules
+
+# Local Cache/Data Files
+App_Data
+
+*.Development.json
+
+# Random other files
+.DS_Store

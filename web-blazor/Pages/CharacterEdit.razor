@@ -1,0 +1,59 @@
+@page "/characters/{characterType}/{characterId}"
+
+@using StarWars.UI.Blazor.Data
+@using StarWars.UI.Blazor.Data.Models
+@using StarWars.UI.Blazor.Shared
+
+@inject StarWarsDataService DataService
+@inject Microsoft.Identity.Web.MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+@inject NavigationManager NavigationManager
+
+<PageHeader PageTitle=@Title BackLink="/characters" />
+
+@if (Character == null) {
+    <SimpleInlineAlert Variant="info" Header="One moment" Content=@($"Loading {CharacterType}...")>
+        <IconElement>
+            <div class="me-2"><Spinner /></div>
+        </IconElement>
+    </SimpleInlineAlert>
+} else {
+    <div>
+        <CharacterEditForm Model=@Character IsNew=@IsNew OnSaveCharacter="@OnSaveCharacterAsync" />
+    </div>
+}
+
+@code {
+    [Parameter] public string CharacterType { get; set; }
+    [Parameter] public string CharacterId { get; set; }
+    private bool IsNew => CharacterId == "new";
+    private string Title => IsNew ? "New Character" : "Edit Character";
+
+    private StarWarsCharacter Character = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Character = await DataService.GetCharacterAsync(CharacterType, CharacterId);
+        }
+        catch (Exception ex)
+        {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+
+    protected async Task OnSaveCharacterAsync(StarWarsCharacter character)
+    {
+        try
+        {
+            var result = await (IsNew ? DataService.AddCharacterAsync(character)
+                                      : DataService.UpdateCharacterAsync(character));
+
+            NavigationManager.NavigateTo("/characters");
+        }
+        catch (Exception ex)
+        {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+}

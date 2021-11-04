@@ -1,0 +1,105 @@
+﻿@using System.Linq
+@using StarWars.UI.Blazor.Data.Models
+@using StarWars.UI.Blazor.Shared
+
+@inject StarWars.UI.Blazor.Data.StarWarsDataService DataService
+
+<table class="table table-striped table-borderless">
+    <tbody>
+        @foreach(var friend in (Friends ?? Enumerable.Empty<StarWarsCharacter>()))
+        {
+        <tr class="align-middle">
+            <td class="w-100">
+                <CharacterIcon Character=@friend IconSize="" />
+                @friend.Name
+            </td>
+            <td class="text-center">
+                <AlignmentIcon Alignment=@friend.Alignment />
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger" @onclick="async args => { await OnRemoveFriend(friend); }">
+                    <Icon IconName="trash" />
+                </button>
+            </td>
+        </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="align-middle">
+            @if (_characterList == null)
+            {
+                <td colspan="3"><Spinner /><span class="ms-3">Loading...</span></td>
+            }
+            else if (!_availableCharacters.Any())
+            {
+                // Nothing to print here...
+            }
+            else
+            {
+
+                <td colspan="2" class="w-100">
+                    <select @onchange="args => { SelectedFriendId = (string)args.Value; }" class="form-select">
+                        <option value=""></option>
+                        @foreach (var item in _availableCharacters)
+                        {
+                        <option value="@item.Id">@item.Name</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success" @onclick="async args => { await OnAddFriend(); }">
+                        <Icon IconName="plus" />
+                    </button>
+                </td>
+            }
+        </tr>
+    </tfoot>
+</table>
+
+@code {
+    [CascadingParameter] public EditContext EditContext { get; set; }
+    [Parameter] public IEnumerable<StarWarsCharacter> Friends { get; set; }
+    [Parameter] public EventCallback<IEnumerable<StarWarsCharacter>> FriendsChanged { get; set; }
+    [Parameter] public string Name { get; set; }
+    [Parameter] public string SelectedFriendId { get; set; }
+
+    private List<StarWarsCharacter> _characterList = null;
+    private List<StarWarsCharacter> _availableCharacters = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Friends = Friends ?? Enumerable.Empty<StarWarsCharacter>();
+
+        _characterList = await DataService.GetCharactersAsync();
+        SetAvailableCharacters();
+    }
+
+    private void SetAvailableCharacters()
+    {
+        _availableCharacters = _characterList?
+                                    .Where(c => !string.Equals(c.Id, ((StarWarsCharacter)EditContext.Model).Id) && !(Friends?.Any(f => string.Equals(f.Id, c.Id)) ?? false))
+                                    .ToList();
+    }
+
+    private async Task OnRemoveFriend(StarWarsCharacter character)
+    {
+        Friends = Friends.Except(new[] { character }).ToList();
+        SetAvailableCharacters();
+        await FriendsChanged.InvokeAsync(Friends);
+    }
+
+    private async Task OnAddFriend()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedFriendId))
+        {
+            var newFriend = _availableCharacters.FirstOrDefault(f => string.Equals(SelectedFriendId, f.Id));
+            if (newFriend != null)
+            {
+                Friends = Friends.Append(newFriend).ToList();
+                SetAvailableCharacters();
+                await FriendsChanged.InvokeAsync(Friends);
+            }
+        }
+    }
+}
+

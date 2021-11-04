@@ -1,0 +1,21 @@
+<div class="d-flex flex-row align-items-center alert alert-@Variant">
+    @IconElement
+    <div className="flex-column">
+        <div class="alert-heading">@Header</div>
+        <span>@Content</span>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Variant { get; set; }
+
+    [Parameter]
+    public RenderFragment IconElement { get; set; }
+
+    [Parameter]
+    public string Header { get; set; }
+
+    [Parameter]
+    public string Content { get; set; }
+}

@@ -1,0 +1,41 @@
+﻿@typeparam TEnum
+
+@using System.Linq
+@using StarWars.UI.Blazor.Extensions
+
+@foreach (var option in (Options ?? Enumerable.Empty<(TEnum, int)>()))
+{
+<div class="form-check-inline">
+    <input type="checkbox" name=@($"{Name}.{option.Index}") checked="@(Values?.Contains(option.Value))" @onchange="async args => { await OnValueChanged(option.Value, (bool)args.Value); }" class="form-check-inline me-2" />
+    <label for=@($"{Name}.{option.Index}") class="form-check-label">@option.Value.AsDisplayString()</label>
+</div>
+
+}
+
+@code {
+    [CascadingParameter] public EditContext EditContext { get; set; }
+    [Parameter] public string Name { get; set; }
+    [Parameter] public IEnumerable<TEnum> Values { get; set; }
+    [Parameter] public EventCallback<IEnumerable<TEnum>> ValuesChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Values = Values ?? Enumerable.Empty<TEnum>();
+    }
+
+    private async Task OnValueChanged(TEnum value, bool isChecked)
+    {
+        if (Values.Contains(value) && !isChecked)
+        {
+            Values = Values.Except(new[] { value }).ToArray();
+        }
+        else if (!Values.Contains(value) && isChecked)
+        {
+            Values = Values.Concat(new[] { value }).ToArray();
+        }
+
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private IEnumerable<(TEnum Value, int Index)> Options => Enum.GetValues(typeof(TEnum)).Cast<TEnum>().Select((v, idx) => (Value: v, Index: idx));
+}

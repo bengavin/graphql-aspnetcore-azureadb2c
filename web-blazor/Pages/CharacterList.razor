@@ -1,0 +1,90 @@
+﻿@page "/characters"
+@attribute [Authorize]
+
+@using System.Linq
+@using StarWars.UI.Blazor.Shared
+@using StarWars.UI.Blazor.Data
+@using StarWars.UI.Blazor.Data.Models
+@inject StarWarsDataService DataService
+@inject Microsoft.Identity.Web.MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+
+<PageHeader PageTitle="Star Wars Characters">
+    <RightContent>
+        <div class="dropdown @ShowClass">
+            <button id="addCharacterButton" aria-expanded="false" type="button" class="dropdown-toggle btn btn-primary" @onclick="args => { OnToggleDropdown(); }">
+                <Icon IconName="plus" Class="me-2" />
+                Add a Character
+            </button>
+            <div x-placement="bottom" aria-labelledby="addCharacterButton" class="dropdown-menu w-100 @ShowClass">
+                <a class="dropdown-item" role="button" tabindex="0">
+                    <NavLink class="dropdown-item" href="/characters/Human/new">Humanoid</NavLink>
+                </a>
+                <a class="dropdown-item" role="button" tabindex="0">
+                    <NavLink class="dropdown-item" href="/characters/Droid/new">Droid</NavLink>
+                </a>
+            </div>
+        </div>
+    </RightContent>
+</PageHeader>
+
+@if (characters == null)
+{
+    <SimpleInlineAlert Variant="info" Header="One moment" Content="Loading your characters...">
+        <IconElement>
+            <div class="me-2"><Spinner /></div>
+        </IconElement>
+    </SimpleInlineAlert>
+}
+else
+{
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Alignment</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var character in characters)
+            {
+                <tr>
+                    <td style="width: '2em', font-size: '1.25em'">
+                        <NavLink href="@($"/characters/{character.GetType().Name}/{character.Id}")">
+                            <Icon IconName="edit" />
+                        </NavLink>
+                    </td>
+                    <td class="align-center w-100">
+                        <CharacterIcon Character=@character IconSize="" Class="me-1" /> 
+                        @character.Name
+                    </td>
+                    <td class="text-center"><AlignmentIcon Alignment=@character.Alignment /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private StarWarsCharacter[] characters;
+    private bool showDropdown = false;
+
+    private string ShowClass {  get { return showDropdown ? "show" : string.Empty; } }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            characters = (await DataService.GetCharactersAsync()).ToArray();
+        }
+        catch (Exception ex)
+        {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+
+    private void OnToggleDropdown()
+    {
+        showDropdown = !showDropdown;
+    }
+}

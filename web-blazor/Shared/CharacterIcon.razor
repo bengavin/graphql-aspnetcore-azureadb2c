@@ -1,0 +1,26 @@
+@using Models = StarWars.UI.Blazor.Data.Models
+
+<div class="d-inline-flex @Class" title="@Title">
+    <Icon IconName=@IconName IconSize=@IconSize />
+</div>
+
+@code {
+    [Parameter] public Models.StarWarsCharacter Character { get; set; }
+    [Parameter] public string IconSize { get; set; } = "2x";
+    [Parameter] public string Class { get; set; } = "";
+
+    public string IconName => Character switch {
+        Models.Human => "user",
+        Models.Droid => "robot",
+        _ => "question-circle"
+    };
+
+    public string Title => Character switch {
+        Models.Human => "Humanoid",
+        Models.Droid => "Droid",
+        _ => "Unknown"
+    };
+}
+
+
+    

@@ -1,0 +1,15 @@
+{
+  "name": "web-blazor",
+  "version": "1.0.0",
+  "description": "Package added to support SASS pre-compilation for Blazor project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "npx sass ./**/*.scss --source-map"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.43.4"
+  }
+}

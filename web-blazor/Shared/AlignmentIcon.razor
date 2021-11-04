@@ -1,0 +1,32 @@
+@using Models = StarWars.UI.Blazor.Data.Models
+
+<div class="@Color" title="@Title">
+    <Icon IconName=@IconName IconSize="2x" />
+</div>
+
+@code {
+    [Parameter] public Models.Alignment Alignment { get; set; }
+
+    public string IconName => Alignment switch {
+        Models.Alignment.DARK => "moon",
+        Models.Alignment.LIGHT => "sun",
+        Models.Alignment.NEUTRAL => "minus",
+        _ => "question-circle"
+    };
+
+    public string Color => Alignment switch {
+        Models.Alignment.DARK => "text-danger",
+        Models.Alignment.LIGHT => "text-info",
+        _ => string.Empty
+    };
+
+    public string Title => Alignment switch {
+        Models.Alignment.DARK => "Dark Side",
+        Models.Alignment.LIGHT => "Light Side",
+        Models.Alignment.NEUTRAL => "Neutral",
+        _ => "Unknown"
+    };
+}
+
+
+    

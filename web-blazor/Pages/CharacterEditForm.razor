@@ -1,0 +1,101 @@
+﻿@using Microsoft.Extensions.Logging 
+@using StarWars.UI.Blazor.Data.Models
+@using StarWars.UI.Blazor.Extensions
+@using StarWars.UI.Blazor.Shared
+@using System.Text.Json
+
+@inject ILogger<CharacterEditForm> Logger
+
+<EditForm Model="@Model" OnValidSubmit="@OnValidSubmit" OnInvalidSubmit="@OnInvalidSubmit" class="ms-5">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <fieldset disabled="@submissionInProgress">
+        <div class="row mb-2">
+            <label for="@nameof(Model.Name)" class="col-form-label col-md-3">Name:</label>
+            <div class="col-md-5">
+                <InputText id="@nameof(Model.Name)" @bind-Value="Model.Name" class="form-control" />
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="@nameof(Model.Alignment)" class="col-form-label col-md-3">Alignment:</label>
+            <div class="col-md-3">
+                <InputSelect id="@nameof(Model.Alignment)" @bind-Value="Model.Alignment" class="form-select">
+                    @foreach (var alignment in AlignmentOptions)
+                    {
+                        <option value=@alignment>@alignment.AsDisplayString()</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        @if (HumanModel != null)
+        {
+            <div class="row mb-2">
+                <label for="@nameof(HumanModel.HomePlanet)" class="col-form-label col-md-3">Home Planet:</label>
+                <div class="col-md-5">
+                    <InputText id="@nameof(HumanModel.HomePlanet)" @bind-Value="HumanModel.HomePlanet" class="form-control" />
+                </div>
+            </div>
+        }
+        @if (DroidModel != null)
+        {
+            <div class="row mb-2">
+                <label for="@nameof(DroidModel.PrimaryFunction)" class="col-form-label col-md-3">Primary Function:</label>
+                <div class="col-md-5">
+                    <InputText id="@nameof(DroidModel.PrimaryFunction)" @bind-Value="DroidModel.PrimaryFunction" class="form-control" />
+                </div>
+            </div>
+        }
+
+        <div class="row mb-2">
+            <label for="@nameof(Model.AppearsIn)" class="col-form-label col-md-3">Appears In:</label>
+            <div class="col-md-5 d-flex flex-column">
+                <EnumCheckboxList @bind-Values="Model.AppearsIn" Name="@nameof(Model.AppearsIn)" />
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label for="@nameof(Model.Friends)" class="col-form-label col-md-3">Friends:</label>
+            <div class="col-md-4">
+                <CharacterFriendList @bind-Friends="Model.Friends" Name="@nameof(Model.Friends)" />
+            </div>
+        </div>
+
+        <div class="d-flex flex-row align-items-center justify-content-end">
+            <NavLink href="/characters" class="me-2 btn btn-secondary">Cancel</NavLink>
+            <button type="submit" class="btn btn-primary me-2">Save Character</button>
+        </div>
+    </fieldset>
+</EditForm>
+
+@code {
+    [Parameter] public StarWarsCharacter Model { get; set; }
+    [Parameter] public bool IsNew { get; set; }
+    [Parameter] public EventCallback<StarWarsCharacter> OnSaveCharacter { get; set; }
+
+    public Human HumanModel => Model as Human;
+    public Droid DroidModel => Model as Droid;
+    public IEnumerable<Alignment> AlignmentOptions => Enum.GetValues<Alignment>();
+    private bool submissionInProgress = false;
+
+    private async Task OnValidSubmit()
+    {
+        Logger.LogInformation("Handle Valid Submit Called");
+        Logger.LogDebug("Data: {Model}", HumanModel != null ? JsonSerializer.Serialize(HumanModel) : JsonSerializer.Serialize(DroidModel));
+
+        submissionInProgress = true;
+        try
+        {
+            await OnSaveCharacter.InvokeAsync(Model);
+        }
+        finally
+        {
+            submissionInProgress = false;
+        }
+    }
+
+    private async Task OnInvalidSubmit()
+    {
+        Logger.LogInformation("Invalid Submission Detected");
+    }
+}
