@@ -29,6 +29,7 @@ resource blazorApp 'Microsoft.Web/sites@2018-11-01' = {
       numberOfWorkers: 1
       linuxFxVersion: 'DOTNETCORE|5.0'
       windowsFxVersion: 'DOTNETCORE|5.0'
+      webSocketsEnabled: true
       appSettings: [
         {
           name: 'AzureB2C_Blazor_UI__ClientId'
