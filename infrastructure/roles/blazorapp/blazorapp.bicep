@@ -27,8 +27,8 @@ resource blazorApp 'Microsoft.Web/sites@2018-11-01' = {
     httpsOnly: false
     siteConfig: {
       numberOfWorkers: 1
-      linuxFxVersion: 'DOTNETCORE|6.0'
-      windowsFxVersion: 'DOTNETCORE|6.0'
+      linuxFxVersion: 'DOTNETCORE|5.0'
+      windowsFxVersion: 'DOTNETCORE|5.0'
       appSettings: [
         {
           name: 'AzureB2C_Blazor_UI__ClientId'
