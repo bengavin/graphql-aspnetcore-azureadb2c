@@ -10,6 +10,9 @@ param region string
 @description('The API App Service Name of the API Application for assignment of KeyVault permissions')
 param apiAppName string = ''
 
+@description('The Blazor App Service Name of the Blazor Web Application for assignment of KeyVault permissions')
+param blazorAppName string = ''
+
 @description('The ObjectId of the Function Application for assignment of KeyVault permissions')
 param funcAppName string = ''
 
@@ -26,6 +29,10 @@ param existingSecrets array = [
 // App Service References
 resource apiApp 'Microsoft.Web/sites@2018-11-01' existing = if (apiAppName != '') {
   name: apiAppName
+}
+
+resource blazorApp 'Microsoft.Web/sites@2018-11-01' existing = if (blazorAppName != '') {
+  name: blazorAppName
 }
 
 resource funcApp 'Microsoft.Web/sites@2018-11-01' existing = if (funcAppName != '' && funcAppResourceGroup != '') {
@@ -54,6 +61,24 @@ var appPolicy = apiAppName != '' ? [
   } 
 }
 ] : []
+
+var blazorPolicy = blazorAppName != '' ? [
+  {
+    objectId: blazorApp.identity.principalId
+    tenantId: subscription().tenantId
+    permissions: {
+      keys: [
+        'get'
+      ]
+      secrets: [
+        'get'
+      ]
+      certificates: [
+        'get'
+      ]
+    } 
+  }
+  ] : []
 
 var funcPolicy = funcAppName != '' ? [
 {
@@ -91,7 +116,7 @@ var webPolicy = webAppName != '' ? [
 } 
 ] : []
 
-var vaultPolicies = concat(appPolicy, funcPolicy, webPolicy)
+var vaultPolicies = concat(appPolicy, funcPolicy, webPolicy, blazorPolicy)
 
 // Key Vault
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
@@ -133,6 +158,20 @@ resource apiAppUIClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!
 
 resource apiAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'ApiApp-AzureB2C-Demo-UI-ClientSecret')) {
   name: '${keyVault.name}/ApiApp-AzureB2C-Demo-UI-ClientSecret'
+  properties: {
+    value: '<fill in portal>'
+  }
+}
+
+resource blazorAppUIClientId 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'BlazorApp-AzureB2C-Blazor-UI-ClientId')) {
+  name: '${keyVault.name}/BlazorApp-AzureB2C-Blazor-UI-ClientId'
+  properties: {
+    value: '<fill in portal>'
+  }
+}
+
+resource blazorAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'BlazorApp-AzureB2C-Blazor-UI-ClientSecret')) {
+  name: '${keyVault.name}/BlazorApp-AzureB2C-Blazor-UI-ClientSecret'
   properties: {
     value: '<fill in portal>'
   }

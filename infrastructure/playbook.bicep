@@ -55,6 +55,17 @@ module apiAppModule 'roles/apiapp/apiapp.bicep' = {
   }
 }
 
+module blazorAppModule 'roles/blazorapp/blazorapp.bicep' = {
+  scope: resourceGroup
+  name: 'blazorAppModule'
+  params: {
+    application: application
+    isLinux: hostOnLinux
+    region: region
+    stage: stage
+  }
+}
+
 module webAppModule 'roles/webapp/webapp.bicep' = {
   scope: resourceGroup
   name: 'webAppModule'
@@ -90,6 +101,7 @@ module keyVaultModule 'roles/keyvault/keyvault.bicep' = {
   params: {
     apiAppName: apiAppModule.outputs.apiApp.properties.name
     application: application
+    blazorAppName: blazorAppModule.outputs.blazorApp.properties.name
     funcAppName: funcAppModule.outputs.funcApp.properties.name
     funcAppResourceGroup: funcResourceGroup.name
     region: region
@@ -100,6 +112,7 @@ module keyVaultModule 'roles/keyvault/keyvault.bicep' = {
 
 // Output created App Service information
 output apiAppName string = apiAppModule.outputs.apiApp.properties.name
+output blazorAppName string = blazorAppModule.outputs.blazorApp.properties.name
 output webAppStorageAccountName string = webAppModule.outputs.websiteStorageAccountName
 output webAppHostname string = webAppModule.outputs.websiteHostName
 output funcAppName string = funcAppModule.outputs.funcApp.properties.name

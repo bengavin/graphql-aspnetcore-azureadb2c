@@ -142,3 +142,31 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: 'az storage blob upload-batch -d \$web -s $(System.ArtifactsDirectory)/web --account-name $(storageAccountName)'
 
+- job: DeployBlazorJob
+  displayName: Deploy Blazor (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  variables:
+    apiAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.blazorAppName'] ]
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download Blazor App Package
+    inputs:
+      buildType: 'current'
+      artifactName: BlazorAppPackage
+      targetPath: '$(System.ArtifactsDirectory)'
+
+  - task: FileTransform@1      
+    displayName: Update settings file(s)
+    inputs:
+      folderPath: '$(System.ArtifactsDirectory)/web-blazor.zip'
+      fileType: 'json'
+      targetFiles: 'appsettings.json'
+
+  - task: AzureRmWebAppDeployment@4
+    displayName: Publish Blazor App Package
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: ${{ parameters.serviceConnection }}
+      appType: 'webAppLinux'
+      WebAppName: '$(blazorAppName)'
+      packageForLinux: '$(System.ArtifactsDirectory)/web-blazor.zip'

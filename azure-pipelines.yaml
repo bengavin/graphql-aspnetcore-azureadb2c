@@ -30,7 +30,7 @@ parameters:
   type: string
 
 stages:
-- stage: BuildApiStage
+- stage: BuildStage
   displayName: Build API
   jobs:
     - job: BuildApiJob
@@ -57,9 +57,33 @@ stages:
             artifact: 'ApiPackage'
             publishLocation: 'pipeline'
 
+    - job: BuildBlazorAppJob
+      displayName: Build Blazor App
+      steps:
+        - task: DotNetCoreCLI@2
+          displayName: dotnet build
+          inputs:
+            command: 'build'
+            projects: 'web-blazor/StarWars.UI.Blazor.csproj'
+
+        - task: DotNetCoreCLI@2
+          displayName: dotnet publish
+          inputs:
+            command: 'publish'
+            projects: 'web-blazor/StarWars.UI.Blazor.csproj'
+            arguments: '--output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: true
+
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Blazor App package to pipeline
+          inputs:
+            targetPath: '$(Build.ArtifactStagingDirectory)/web-blazor.zip'
+            artifact: 'BlazorAppPackage'
+            publishLocation: 'pipeline'
+
 - stage: TestEnvironmentStage
   displayName: Test Environment
-  dependsOn: BuildApiStage
+  dependsOn: BuildStage
   variables: 
     - group: securegqldemo - Test
   jobs:
