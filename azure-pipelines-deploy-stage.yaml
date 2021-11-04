@@ -146,7 +146,7 @@ jobs:
   displayName: Deploy Blazor (${{ parameters.environment }})
   dependsOn: DeployEnvironmentJob
   variables:
-    apiAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.blazorAppName'] ]
+    blazorAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.blazorAppName'] ]
   steps:
   - task: DownloadPipelineArtifact@2
     displayName: Download Blazor App Package
