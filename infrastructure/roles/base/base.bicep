@@ -66,6 +66,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
 // Cosmos Cache
 resource cosmosCache 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
   name: 'cosmos-${stage}-${application}'
+  location: region
+  kind: 'GlobalDocumentDB'
   properties: {
     createMode: 'Default'
     databaseAccountOfferType: 'Standard'
@@ -82,6 +84,10 @@ resource cosmosCache 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' 
       }
     ]
     enableFreeTier: false
+  }
+  tags: {
+    environment: stage
+    application: application
   }
 }
 
