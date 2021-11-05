@@ -63,6 +63,38 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   }
 }
 
+// Cosmos Cache
+resource cosmosCache 'Microsoft.DocumentDB/databaseAccounts@2021-07-01-preview' = {
+  name: 'cosmos-${stage}-${application}'
+  properties: {
+    createMode: 'Default'
+    databaseAccountOfferType: 'Standard'
+    locations: [
+      {
+        locationName: region
+        failoverPriority: 0
+        isZoneRedundant: false
+      }
+    ]
+    capabilities: [
+      {
+        name: 'EnableServerless'
+      }
+    ]
+    enableFreeTier: false
+  }
+}
+
+resource cosmosSqlDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2021-07-01-preview' = {
+  parent: cosmosCache
+  name: 'TokenCache'
+  properties: {
+    resource: {
+      id: 'TokenCache'
+    }
+  }
+}
+
 output logAnalytics object = logAnalytics
 output appInsights object = appInsights
 output storageAccountName string = storageAccount.name

@@ -176,3 +176,10 @@ resource blazorAppUIClientSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' 
     value: '<fill in portal>'
   }
 }
+
+resource blazorAppUITokenCacheConfiguration 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (!contains(existingSecrets, 'BlazorApp-AzureB2C-Blazor-UI-TokenCacheConfiguration')) {
+  name: '${keyVault.name}/BlazorApp-AzureB2C-Blazor-UI-TokenCacheConfiguration'
+  properties: {
+    value: '<fill in portal>'
+  }
+}

@@ -39,6 +39,10 @@ resource blazorApp 'Microsoft.Web/sites@2018-11-01' = {
           name: 'AzureB2C_Blazor_UI__ClientSecret'
           value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/BlazorApp-AzureB2C-Blazor-UI-ClientSecret/)'
         }
+        {
+          name: 'AzureB2C_Blazor_UI__TokenCache'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/BlazorApp-AzureB2C-Blazor-UI-TokenCacheConfiguration/)'
+        }
       ]
     }
   }

@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Azure.Cosmos.Fluent;
+using Microsoft.Extensions.Caching.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,8 +41,21 @@ namespace StarWars.UI.Blazor
 
             services.AddScoped<StarWarsDataService>();
 
-            // NOTE: DO NOT USE THIS IN PRODUCTION, EVER
-            services.AddInsecureDistributedTokenCache();
+            if (string.Equals(Configuration["AzureB2C_Blazor_UI:TokenCache:Type"], "local", StringComparison.OrdinalIgnoreCase))
+            {
+                // NOTE: DO NOT USE THIS IN PRODUCTION, EVER
+                services.AddInsecureDistributedTokenCache();
+            }
+            else
+            {
+                services.AddCosmosCache(options => {
+                    var cacheConfig = Configuration.GetSection("AzureB2C_Blazor_UI:TokenCache");
+                    options.DatabaseName = cacheConfig["Database"];
+                    options.ContainerName = cacheConfig["Container"];
+                    options.ClientBuilder = new CosmosClientBuilder(cacheConfig["ConnectionString"]);
+                    options.CreateIfNotExists = true;
+                });
+            }
 
             // UI level auth (Cookie)
             services.AddMicrosoftIdentityWebAppAuthentication(
