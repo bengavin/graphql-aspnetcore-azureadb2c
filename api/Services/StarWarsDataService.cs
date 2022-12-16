@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using Microsoft.Identity.Web;
 using StarWars.API.Models;
 
 namespace StarWars.API.Services;
@@ -12,10 +14,49 @@ public interface IStarWarsDataService
 
 public class StarWarsDataService : IStarWarsDataService
 {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ConcurrentDictionary<string, UserStarWarsDataService> _userData = new ConcurrentDictionary<string, UserStarWarsDataService>();
+
+    public StarWarsDataService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    private UserStarWarsDataService GetUserDataService()
+    {
+        var userId = _httpContextAccessor.HttpContext?.User?.GetNameIdentifierId();
+        if (string.IsNullOrWhiteSpace(userId)) { throw new UnauthorizedAccessException("You must be authenticated to proceed"); }
+
+        return _userData.GetOrAdd(userId, (id) => new UserStarWarsDataService());
+    }
+
+    public Human AddHuman(Human human)
+    {
+        return GetUserDataService().AddHuman(human);
+    }
+
+    public Task<Droid?> GetDroidByIdAsync(string id)
+    {
+        return GetUserDataService().GetDroidByIdAsync(id);
+    }
+
+    public IEnumerable<StarWarsCharacter> GetFriends(StarWarsCharacter character)
+    {
+        return GetUserDataService().GetFriends(character);
+    }
+
+    public Task<Human?> GetHumanByIdAsync(string id)
+    {
+        return GetUserDataService().GetHumanByIdAsync(id);
+    }
+}
+
+public class UserStarWarsDataService : IStarWarsDataService
+{
     private readonly List<Human> _humans = new List<Human>();
     private readonly List<Droid> _droids = new List<Droid>();
 
-    public StarWarsDataService()
+    public UserStarWarsDataService()
     {
         _humans.Add(new Human
         {

@@ -90,3 +90,4 @@ Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 
+api/appsettings.Development.json

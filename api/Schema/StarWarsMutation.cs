@@ -1,6 +1,7 @@
 using GraphQL;
 using GraphQL.Types;
 using StarWars.API.Models;
+using StarWars.API.Security;
 using StarWars.API.Services;
 
 namespace StarWars.API.Schema;
@@ -28,6 +29,7 @@ public class StarWarsMutation : ObjectGraphType
             {
                 var human = context.GetArgument<Human>("human");
                 return data.AddHuman(human);
-            });
+            })
+            .AuthorizeWithPolicy(Policies.CharacterWriteAccess);
     }
 }
