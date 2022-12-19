@@ -1,0 +1,91 @@
+# Securing ASP.NET Core GraphQL API with Azure Active Directory B2C
+#
+# Build Script
+# 
+# Basic Flow
+# - Build API Package
+# - Test Environment
+#   - Ensure Environment State
+#   - Deploy API to environment
+# - Stage Environment
+#   - Ensure Environment State
+#   - Deploy API to environment
+# ... production ... eventually ...
+
+trigger:
+  - net7-part-4
+  - main
+  
+pool:
+  vmImage: ubuntu-latest
+  
+# NOTE: This is a workaround for service connections not supporting variable replacement
+#       at runtime (see: https://developercommunity.visualstudio.com/t/using-a-variable-for-the-service-connection-result/676259)
+variables:
+  - group: securegqldemo - Defaults
+  
+stages:
+  - stage: BuildApiStage
+    displayName: Build API
+    jobs:
+      - job: BuildApiJob
+        displayName: Build Api
+        steps:
+          - task: UseDotNet@2
+            displayName: Specify .NET Version
+            inputs:
+              version: '7.x'
+
+          - task: DotNetCoreCLI@2
+            displayName: dotnet build
+            inputs:
+              command: 'build'
+              projects: 'api/StarWars.API.csproj'
+  
+          - task: DotNetCoreCLI@2
+            displayName: dotnet publish
+            inputs:
+              command: 'publish'
+              projects: 'api/StarWars.API.csproj'
+              arguments: '--output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+  
+          - task: PublishPipelineArtifact@1
+            displayName: Publish API package to pipeline
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/api.zip'
+              artifact: 'ApiPackage'
+              publishLocation: 'pipeline'
+
+  - stage: DevEnvironmentStage
+    displayName: Dev Environment
+    dependsOn: BuildApiStage
+    variables: 
+      - group: securegqldemo - Dev
+    jobs:
+      - template: "azure-pipelines-deploy-stage.yaml"
+        parameters:
+          serviceConnection: $(Deployment.ServiceConnection)
+          environment: Dev
+            
+  - stage: TestEnvironmentStage
+    displayName: Test Environment
+    dependsOn: BuildApiStage
+    variables: 
+      - group: securegqldemo - Test
+    jobs:
+      - template: "azure-pipelines-deploy-stage.yaml"
+        parameters:
+          serviceConnection: $(Deployment.ServiceConnection)
+          environment: Test
+  
+  - stage: StageEnvironmentStage
+    displayName: Stage Environment
+    dependsOn: TestEnvironmentStage
+    variables: 
+      - group: securegqldemo - Stage
+    jobs:
+      - template: "azure-pipelines-deploy-stage.yaml"
+        parameters:
+          serviceConnection: $(Deployment.ServiceConnection)
+          environment: Stage

@@ -9,13 +9,17 @@ using StarWars.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Application Insights
+builder.Services.AddApplicationInsightsTelemetry(); // Add this line of code to enable Application Insights.
+builder.Services.AddServiceProfiler(); // Add this line of code to Enable Profiler
+
 // Application Services
 builder.Services.AddSingleton<IStarWarsDataService, StarWarsDataService>();
 
 // API level auth
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(
     builder.Configuration,
-    "AzureB2C-Demo-API",
+    "AzureB2C_Demo_API",
     JwtBearerDefaults.AuthenticationScheme
 );
 
@@ -32,7 +36,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 builder.Services
        .AddMicrosoftIdentityWebAppAuthentication(
             builder.Configuration,
-            "AzureB2C-Demo-UI",
+            "AzureB2C_Demo_UI",
             OpenIdConnectDefaults.AuthenticationScheme
         )
         .EnableTokenAcquisitionToCallDownstreamApi()
@@ -43,7 +47,7 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddRazorPages();
 
 builder.Services.AddOptions();
-builder.Services.Configure<OpenIdConnectOptions>(builder.Configuration.GetSection("AzureB2C-Demo-UI"));
+builder.Services.Configure<OpenIdConnectOptions>(builder.Configuration.GetSection("AzureB2C_Demo_UI"));
 
 // GraphQL
 builder.Services.AddScoped<GraphQLUserContextBuilder>();

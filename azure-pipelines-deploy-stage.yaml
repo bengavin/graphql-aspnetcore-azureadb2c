@@ -1,0 +1,84 @@
+# All parameters are required
+parameters:
+  - name: serviceConnection
+    type: string
+  - name: environment
+    type: string
+
+jobs:
+- job: DeployEnvironmentJob
+  displayName: Deploy ${{ parameters.environment }} environment to Azure
+  steps:
+  - task: AzureCLI@2
+    displayName: Deploy Bicep template
+    name: BicepDeploy
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      workingDirectory: 'infrastructure'
+      addSpnToEnvironment: true
+      inlineScript: |
+        echo "Check for Key Vault existence"
+        resourceGroupName=rg-$(Deployment.Environment)-$(Deployment.Application)
+        vaultName=kv-$(Deployment.Environment)-$(Deployment.Application)
+
+        echo "Executing: az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName"
+        vaultNames=`az keyvault list --resource-group $resourceGroupName --query '[].name' --output tsv | grep $vaultName`
+        echo "Found Key Vault: $vaultNames == $vaultName"
+
+        secretNames='[]'
+        if [ "$vaultNames" != "" ]; then
+          echo "Ensure secret list permissions"
+          az keyvault set-policy --name $vaultName --secret-permissions list --spn $servicePrincipalId
+
+          echo "Retrieving Existing Key Vault Secret Name(s)"
+          secretNames=`az keyvault secret list --vault-name $vaultName --query '[].name' --output json`
+        fi
+        echo "Key Vault Secret Name(s): $secretNames"
+
+        echo "Deploying Bicep Template..."
+        echo "az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets=\"$secretNames\""
+        outputs=`az deployment sub create --name playbook-$(Deployment.Environment)-$(Deployment.Application) --location $(Deployment.Metadata.Location) --template-file playbook.bicep --parameters vars/playbook.parameters.json vars/playbook.parameters.$(Deployment.Environment).json existingKeyVaultSecrets="$secretNames"`
+        
+        if [ "$outputs" = "" ]; then
+          echo "Deployment failed..."
+          exit 1
+        fi
+
+        echo "Capturing outputs..."
+        echo $outputs | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
+          while IFS=$"\n" read -r c; do
+            outputname=$(echo "$c" | jq -r '.[0]')
+            outputvalue=$(echo "$c" | jq -r '.[1]')
+            echo "##vso[task.setvariable variable=$outputname;isOutput=true]$outputvalue"
+          done
+
+- job: DeployApiJob
+  displayName: Deploy API (${{ parameters.environment }})
+  dependsOn: DeployEnvironmentJob
+  variables:
+    apiAppName: $[ dependencies.DeployEnvironmentJob.outputs['BicepDeploy.apiAppName'] ]
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download API Package
+    inputs:
+      buildType: 'current'
+      artifactName: ApiPackage
+      targetPath: '$(System.ArtifactsDirectory)'
+
+  - task: FileTransform@1      
+    displayName: Update settings file(s)
+    inputs:
+      folderPath: '$(System.ArtifactsDirectory)/api.zip'
+      fileType: 'json'
+      targetFiles: 'appsettings.json'
+
+  - task: AzureRmWebAppDeployment@4
+    displayName: Publish API Package
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: ${{ parameters.serviceConnection }}
+      appType: 'webAppLinux'
+      WebAppName: '$(apiAppName)'
+      packageForLinux: '$(System.ArtifactsDirectory)/api.zip'
