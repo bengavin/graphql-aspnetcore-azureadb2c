@@ -53,6 +53,24 @@ resource apiApp 'Microsoft.Web/sites@2022-03-01' = {
       numberOfWorkers: 1
       linuxFxVersion: 'DOTNETCORE|7.0'
       windowsFxVersion: 'DOTNETCORE|7.0'
+      appSettings: [
+        {
+          name: 'AzureB2C_Demo_API__ClientId'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-API-ClientId/)'
+        }
+        {
+          name: 'AzureB2C_Demo_UI__ClientId'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientId/)'
+        }
+        {
+          name: 'AzureB2C_Demo_UI__ClientSecret'
+          value: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret/)'
+        }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: appInsights.properties.InstrumentationKey
+        }
+      ]
       keyVaultReferenceIdentity: 'SystemAssigned'
     }
   }
@@ -71,20 +89,6 @@ resource apiLogExtension 'Microsoft.Web/sites/siteextensions@2022-03-01' = if (!
   dependsOn: [
     appInsights
   ]
-}
-
-var dependencies = isLinux ? [] : [ apiLogExtension ]
-
-resource apiLogging 'Microsoft.Web/sites/config@2022-03-01' = {
-  parent: apiApp
-  name: 'appsettings'
-  dependsOn: dependencies
-  properties: {
-    APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
-    AzureB2C_Demo_API__ClientId: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-API-ClientId/)'
-    AzureB2C_Demo_UI__ClientId: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientId/)'
-    AzureB2C_Demo_UI__ClientSecret: '@Microsoft.KeyVault(SecretUri=https://kv-${stage}-${application}.vault.azure.net/secrets/ApiApp-AzureB2C-Demo-UI-ClientSecret/)'
-  }
 }
 
 resource apiLogSettings 'Microsoft.Web/sites/config@2022-03-01' = {
