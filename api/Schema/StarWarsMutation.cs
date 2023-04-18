@@ -31,5 +31,36 @@ public class StarWarsMutation : ObjectGraphType
                 return data.AddHuman(human);
             })
             .AuthorizeWithPolicy(Policies.CharacterWriteAccess);
+
+        Field<HumanType>("updateHuman")
+            .Argument<NonNullGraphType<IdGraphType>>("id")
+            .Argument<NonNullGraphType<HumanInputType>>("human")
+            .Resolve(context =>
+            {
+                var id = context.GetArgument<string>("id");
+                var human = context.GetArgument<Human>("human");
+                return data.UpdateHuman(id, human);
+            })
+            .AuthorizeWithPolicy(Policies.CharacterWriteAccess);
+
+        Field<DroidType>("createDroid")
+            .Argument<NonNullGraphType<DroidInputType>>("droid")
+            .Resolve(context =>
+            {
+                var droid = context.GetArgument<Droid>("droid");
+                return data.AddDroid(droid);
+            })
+            .AuthorizeWithPolicy(Policies.CharacterWriteAccess);
+
+        Field<DroidType>("updateDroid")
+            .Argument<NonNullGraphType<IdGraphType>>("id")
+            .Argument<NonNullGraphType<DroidInputType>>("droid")
+            .Resolve(context =>
+            {
+                var id = context.GetArgument<string>("id");
+                var droid = context.GetArgument<Droid>("droid");
+                return data.UpdateDroid(id, droid);
+            })
+            .AuthorizeWithPolicy(Policies.CharacterWriteAccess);
     }
 }

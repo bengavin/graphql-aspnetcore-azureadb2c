@@ -1,0 +1,81 @@
+@import "./Bootstrap.scss";
+
+
+// Create CSS Variables
+:root {
+    --body-bg: #{$body-bg};
+    --body-color: #{$body-color};
+    --primary: #{$primary};
+    --secondary: #{$secondary};
+    --success: #{$success};
+    --info: #{$info};
+    --warning: #{$warning};
+    --danger: #{$danger};
+    --light: #{$light};
+    --dark: #{$dark};
+    --spacer: #{$spacer};
+}
+
+html * {
+    box-sizing: border-box;
+    position: relative;
+}
+:root {
+    --gutter: 1rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: $header-font-family;
+}
+
+body {
+    max-width: 1200px;
+    margin: 5px 5px 40px 5px;
+}
+
+#root {
+    .navbar-dark {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    header {
+        padding: var(--gutter);
+        .navbar-section {
+            align-items: flex-start;
+        }
+
+        /* nav a {
+      padding: 10px 10px;
+      &:first-child {
+        padding: 10px 10px 10px 0;
+      }
+    } */
+    }
+    main {
+        margin-top: 10px;
+        padding: 0 var(--gutter);
+    }
+}
+
+img {
+    max-width: 100%;
+}
+p {
+    max-width: 80ch;
+}
+textarea {
+    resize: vertical;
+}
+.no-select {
+    user-select: none;
+}
+.invisible {
+    opacity: 0;
+}
+
+@media (max-width: 600px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}

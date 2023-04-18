@@ -13,6 +13,7 @@ public class GraphiqlController : Controller
 {
     private readonly IConfiguration _configuration;
     private readonly ITokenAcquisition _tokens;
+    private readonly ILogger<GraphiqlController> _logger;
 
     public class GraphiqlViewModel
     {
@@ -21,16 +22,19 @@ public class GraphiqlController : Controller
         public HtmlString? Headers { get; set; }
     }
 
-    public GraphiqlController(IConfiguration configuration, ITokenAcquisition tokens)
+    public GraphiqlController(IConfiguration configuration, ITokenAcquisition tokens, ILogger<GraphiqlController> logger)
     {
         _configuration = configuration;
         _tokens = tokens;
+        _logger = logger;
     }
 
     [Route("ui/graphiql")]
     [HttpGet]
     public async Task<IActionResult> Index()
     {
+        _logger.LogInformation($"Retrieving GraphiQL Token...");
+        
         var accessToken = await _tokens.GetAccessTokenForUserAsync(
                             (_configuration["GraphiQL:ApiScopes"] ?? string.Empty)
                             .Split(new [] { ' ', ',' }));

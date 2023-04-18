@@ -13,6 +13,8 @@ public class DroidType : ObjectGraphType<Droid>
 
         Field(d => d.Id).Description("The id of the droid.");
         Field(d => d.Name, nullable: true).Description("The name of the droid.");
+        Field<AlignmentEnum>("alignment").Description("The alignment of the character")
+                                         .Resolve(ctx => ctx.Source.Alignment);
 
         Field<ListGraphType<CharacterInterface>>("friends").Resolve(context => data.GetFriends(context.Source));
 

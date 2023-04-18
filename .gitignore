@@ -91,3 +91,9 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 api/appsettings.Development.json
+
+# Web Node Modules
+web/node_modules
+web/.env
+web/.parcel-cache
+web/dist

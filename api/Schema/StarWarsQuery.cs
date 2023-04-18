@@ -15,6 +15,10 @@ public class StarWarsQuery : ObjectGraphType
             .ResolveAsync(async context => await data.GetDroidByIdAsync("3"))
             .AuthorizeWithPolicy(Policies.CharacterAccess);
 
+        Field<ListGraphType<CharacterInterface>>("characters")
+            .ResolveAsync(async context => await data.GetCharactersAsync())
+            .AuthorizeWithPolicy(Policies.CharacterAccess);
+
         Field<HumanType>("human")
             .Argument<NonNullGraphType<StringGraphType>>("id", "id of the human")
             .ResolveAsync(async context => await data.GetHumanByIdAsync(context.GetArgument<string>("id")))
